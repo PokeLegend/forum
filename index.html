@@ -7,7 +7,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <style>
-    /* ===== RESET & BASE ===== */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: 'Segoe UI', system-ui, sans-serif;
@@ -19,13 +18,9 @@
     }
     .container { max-width: 720px; margin: 0 auto; }
 
-    /* ===== INTRO OVERLAY ===== */
     .intro-overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
+      inset: 0;
       background: #0b0d17;
       display: flex;
       flex-direction: column;
@@ -70,22 +65,11 @@
     @keyframes zoomIn { to { opacity: 1; transform: scale(1); } }
     @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
     @keyframes fadeInLoader { to { opacity: 1; } }
-    @keyframes fadeOutContainer {
-      to {
-        opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
-      }
-    }
+    @keyframes fadeOutContainer { to { opacity: 0; visibility: hidden; pointer-events: none; } }
 
-    /* ===== MAIN CONTENT ===== */
-    .main-content {
-      opacity: 0;
-      animation: fadeInContent 0.6s ease-out forwards 3.2s;
-    }
+    .main-content { opacity: 0; animation: fadeInContent 0.6s ease-out forwards 3.2s; }
     @keyframes fadeInContent { to { opacity: 1; } }
 
-    /* ===== TOP BAR ===== */
     .top-bar {
       display: flex;
       justify-content: space-between;
@@ -127,8 +111,16 @@
       border-radius: 20px;
       color: #88b0f0;
     }
+    /* Admin badge in top bar */
+    .top-bar .auth-badge.admin-badge-top {
+      background: #ff0033;
+      color: #fff;
+      font-weight: 700;
+      border: 1px solid #ff0033;
+      box-shadow: 0 0 20px rgba(255,0,51,0.3);
+    }
+    .top-bar .auth-badge.admin-badge-top i { color: #fff; }
 
-    /* ===== STATS ROW ===== */
     .stats-row {
       display: flex;
       justify-content: space-around;
@@ -143,7 +135,22 @@
     .stats-row .num { font-weight: 700; color: #38bdf8; font-size: 1.2rem; }
     .stats-row .label { color: #7a82a0; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.5px; }
 
-    /* ===== CREATE THREAD ===== */
+    .panel { display: none; animation: fadeUp 0.3s ease; }
+    .panel.active { display: block; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .tag-select {
+      width: 100%;
+      padding: 0.6rem 0.9rem;
+      margin-bottom: 0.6rem;
+      background: #0f1426;
+      border: 1px solid #2a2f4b;
+      border-radius: 12px;
+      color: #e4e6eb;
+      font-size: 0.95rem;
+    }
+    .tag-select:focus { outline: none; border-color: #38bdf8; }
+
     .create-thread {
       background: #13172b;
       border-radius: 16px;
@@ -162,18 +169,17 @@
       color: #e4e6eb;
       font-size: 0.95rem;
     }
-    .create-thread input:focus, .create-thread textarea:focus {
-      outline: none;
-      border-color: #38bdf8;
-    }
+    .create-thread input:focus, .create-thread textarea:focus { outline: none; border-color: #38bdf8; }
     .create-thread textarea { min-height: 70px; resize: vertical; }
     .create-thread .row { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; }
     .create-thread .row input { flex: 2; min-width: 120px; }
+
     .file-input-wrapper {
       display: flex;
       align-items: center;
       gap: 0.5rem;
       margin-bottom: 0.6rem;
+      flex-wrap: wrap;
     }
     .file-input-wrapper input[type="file"] { display: none; }
     .file-input-wrapper label {
@@ -183,14 +189,15 @@
       color: #88b0f0;
       cursor: pointer;
       font-size: 0.85rem;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
     }
-    .file-input-wrapper .preview {
-      max-width: 60px;
-      max-height: 60px;
-      border-radius: 8px;
-      border: 1px solid #2a2f4b;
-      display: none;
-    }
+    .file-input-wrapper label:hover { background: #2a3360; }
+    .file-input-wrapper .preview { max-width: 60px; max-height: 60px; border-radius: 8px; border: 1px solid #2a2f4b; display: none; }
+    .file-input-wrapper .filename { font-size: 0.8rem; color: #7a82a0; margin-left: 0.3rem; }
+
     .btn-primary {
       background: linear-gradient(135deg, #0ea5e9, #06b6d4);
       border: none;
@@ -217,7 +224,32 @@
     .status-msg.sent { color: #2dd4bf; }
     .status-msg.error { color: #f43f5e; }
 
-    /* ===== ROLE TINTS ===== */
+    .filter-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .filter-row select {
+      background: #13172b;
+      border: 1px solid #2a2f4b;
+      border-radius: 30px;
+      padding: 0.3rem 1rem;
+      color: #e4e6eb;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .filter-row select:focus { outline: none; border-color: #38bdf8; }
+    .filter-row .tag-badge {
+      background: #1e2648;
+      padding: 0.2rem 0.6rem;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      color: #88b0f0;
+    }
+
     .admin-post { background: #2a0f1a !important; border: 2px solid #ff0033 !important; box-shadow: 0 0 30px rgba(255,0,51,0.2); }
     .admin-post .author .name { color: #ff0033 !important; font-weight: 800; }
     .admin-badge {
@@ -241,32 +273,6 @@
       border: 1px solid rgba(255,255,255,0.1);
     }
 
-    /* ===== DELETE BUTTON ===== */
-    .delete-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.2rem 0.8rem;
-      font-size: 0.75rem;
-      font-weight: 500;
-      color: #fff;
-      background: #dc2626;
-      border: none;
-      border-radius: 60px;
-      cursor: pointer;
-      transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
-      box-shadow: 0 2px 8px rgba(220,38,38,0.2);
-      font-family: inherit;
-      line-height: 1.5;
-    }
-    .delete-btn:hover { background: #b91c1c; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(220,38,38,0.35); }
-    .delete-btn:active { transform: scale(0.95); }
-    .delete-btn i { font-size: 0.75rem; }
-    .delete-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; box-shadow: none; background: #dc2626; }
-
-    .my-post { border-left-color: #38bdf8 !important; border-left-width: 5px; }
-
-    /* ===== THREAD CARD ===== */
     .thread-card {
       background: #13172b;
       border-radius: 16px;
@@ -279,47 +285,19 @@
     .thread-card .author img { width: 32px; height: 32px; border-radius: 50%; background: #1e2648; border: 2px solid #2a2f4b; }
     .thread-card .author .name { font-weight: 600; font-size: 0.9rem; }
     .thread-card .author .time { font-size: 0.7rem; color: #7a82a0; margin-left: auto; }
+    .thread-card .author .tag-badge { background: #1e2648; padding: 0.1rem 0.5rem; border-radius: 10px; font-size: 0.6rem; color: #88b0f0; }
     .thread-card .author .lock-icon { color: #fbbf24; margin-left: 0.3rem; }
     .thread-card .author .age-icon { color: #fbbf24; margin-left: 0.3rem; }
-    .thread-card .author .delete-wrap { margin-left: auto; display: flex; align-items: center; gap: 0.4rem; }
     .thread-card h2 { font-size: 1.1rem; font-weight: 600; margin: 0.2rem 0 0.3rem; }
     .thread-card .content { color: #c8cee0; line-height: 1.4; margin-bottom: 0.5rem; font-size: 0.95rem; word-wrap: break-word; }
-
-    /* Media display */
-    .media-wrapper {
-      margin: 0.5rem 0;
-      border-radius: 12px;
-      overflow: hidden;
-      max-width: 100%;
-    }
-    .media-wrapper video {
-      width: 100%;
-      max-height: 400px;
-      border-radius: 12px;
-      background: #000;
-    }
-    .media-wrapper .file-download {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.4rem 1rem;
-      background: #1e2648;
-      border-radius: 30px;
-      color: #88b0f0;
-      text-decoration: none;
-      font-size: 0.9rem;
-      transition: 0.2s;
-    }
-    .media-wrapper .file-download:hover { background: #2a3360; color: #fff; }
-    .thread-image {
-      max-width: 100%;
-      border-radius: 12px;
-      margin: 0.5rem 0;
-      max-height: 300px;
-      object-fit: cover;
-    }
+    .thread-card .thread-image { max-width: 100%; border-radius: 12px; margin: 0.5rem 0; max-height: 300px; object-fit: cover; }
     .image-blur { filter: blur(20px); transition: filter 0.3s ease; }
     .image-blur.unblurred { filter: none; }
+
+    .media-wrapper { margin: 0.5rem 0; border-radius: 12px; overflow: hidden; max-width: 100%; }
+    .media-wrapper video { width: 100%; max-height: 400px; border-radius: 12px; background: #000; }
+    .media-wrapper .file-download { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 1rem; background: #1e2648; border-radius: 30px; color: #88b0f0; text-decoration: none; font-size: 0.9rem; transition: 0.2s; }
+    .media-wrapper .file-download:hover { background: #2a3360; color: #fff; }
 
     .thread-card .actions {
       display: flex;
@@ -330,10 +308,28 @@
       padding-top: 0.5rem;
       margin-top: 0.3rem;
       flex-wrap: wrap;
+      align-items: center;
     }
     .thread-card .actions span { display: flex; align-items: center; gap: 0.3rem; cursor: pointer; }
     .thread-card .actions span i { font-size: 0.9rem; }
     .thread-card .actions .liked { color: #f43f5e; }
+    .thread-card .actions .edit-btn, .thread-card .actions .delete-btn {
+      background: none; border: none; color: #7a82a0; cursor: pointer; font-size: 0.8rem; padding: 0 0.2rem; transition: color 0.2s;
+    }
+    .thread-card .actions .edit-btn:hover { color: #38bdf8; }
+    .thread-card .actions .delete-btn:hover { color: #f43f5e; }
+    .thread-card .actions .admin-label {
+      font-size: 0.6rem;
+      color: #ff0033;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: rgba(255,0,51,0.15);
+      padding: 0.1rem 0.5rem;
+      border-radius: 12px;
+      border: 1px solid rgba(255,0,51,0.3);
+    }
+
     .show-replies-btn {
       background: transparent;
       border: none;
@@ -348,7 +344,6 @@
     }
     .show-replies-btn:hover { text-decoration: underline; }
 
-    /* ===== REPLIES ===== */
     .replies-container { margin-top: 0.8rem; padding-left: 1rem; border-left: 2px solid #2a2f4b; }
     .reply-item {
       background: #0f1426;
@@ -362,40 +357,37 @@
     .reply-item .author img { width: 24px; height: 24px; border-radius: 50%; background: #1e2648; }
     .reply-item .author .name { font-weight: 500; font-size: 0.8rem; }
     .reply-item .author .time { font-size: 0.65rem; color: #7a82a0; margin-left: auto; }
-    .reply-item .author .delete-wrap { margin-left: auto; display: flex; align-items: center; gap: 0.3rem; }
     .reply-item .content { font-size: 0.9rem; color: #c8cee0; margin-top: 0.1rem; word-wrap: break-word; }
-    .reply-item .reply-image {
-      max-width: 100%;
-      border-radius: 8px;
-      margin-top: 0.3rem;
-      max-height: 200px;
-      object-fit: cover;
-    }
-    .reply-item .reply-video {
-      width: 100%;
-      max-height: 300px;
-      border-radius: 8px;
-      background: #000;
-    }
-    .reply-item .reply-file {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.3rem 0.8rem;
-      background: #1e2648;
-      border-radius: 20px;
-      color: #88b0f0;
-      text-decoration: none;
-      font-size: 0.85rem;
-      margin-top: 0.3rem;
-    }
+    .reply-item .reply-image { max-width: 100%; border-radius: 8px; margin-top: 0.3rem; max-height: 200px; object-fit: cover; }
+    .reply-item .reply-video { width: 100%; max-height: 300px; border-radius: 8px; background: #000; }
+    .reply-item .reply-file { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.8rem; background: #1e2648; border-radius: 20px; color: #88b0f0; text-decoration: none; font-size: 0.85rem; margin-top: 0.3rem; }
     .reply-item .reply-file:hover { background: #2a3360; color: #fff; }
     .reply-item .admin-post { background: #2a0f1a !important; border: 1px solid #ff0033 !important; }
     .reply-item .mod-post { background: #1f2a0f !important; border: 1px solid #ff8800 !important; }
     .reply-item .unverified-post { background: #1a1a2a !important; border: 1px solid rgba(255,255,255,0.2) !important; }
-    .reply-item.my-post { border-left: 3px solid #38bdf8 !important; border-left-width: 4px; }
+    .reply-item .actions { display: flex; gap: 0.6rem; margin-top: 0.2rem; flex-wrap: wrap; align-items: center; }
+    .reply-item .actions .edit-btn, .reply-item .actions .delete-btn {
+      background: none; border: none; color: #7a82a0; cursor: pointer; font-size: 0.75rem; padding: 0 0.2rem; transition: color 0.2s;
+    }
+    .reply-item .actions .edit-btn:hover { color: #38bdf8; }
+    .reply-item .actions .delete-btn:hover { color: #f43f5e; }
+    .reply-item .actions .admin-label {
+      font-size: 0.55rem;
+      color: #ff0033;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: rgba(255,0,51,0.12);
+      padding: 0.05rem 0.4rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255,0,51,0.2);
+    }
 
-    .reply-form { margin-top: 0.6rem; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .reply-form {
+      margin-top: 0.6rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
     .reply-form input, .reply-form textarea {
       flex: 1;
       min-width: 80px;
@@ -407,49 +399,17 @@
       font-size: 0.85rem;
     }
     .reply-form textarea { flex-basis: 100%; min-height: 40px; border-radius: 12px; }
+    .reply-form .file-input-wrapper { flex-basis: 100%; margin-bottom: 0.3rem; }
     .reply-form button { background: #1e2648; border: none; padding: 0.4rem 1rem; border-radius: 30px; color: #88b0f0; font-weight: 600; cursor: pointer; font-size: 0.8rem; }
     .reply-form button:hover { background: #2a3360; color: white; }
     .reply-form button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    .file-input-wrapper.conditional {
-      display: none;
-    }
-    .file-input-wrapper.conditional.visible {
-      display: flex;
-    }
-
-    /* ===== LOCK / AGE OVERLAYS ===== */
-    .lock-overlay, .age-overlay {
-      background: rgba(0,0,0,0.85);
-      padding: 1rem;
-      border-radius: 12px;
-      text-align: center;
-      margin: 0.5rem 0;
-    }
-    .lock-overlay input, .age-overlay input {
-      background: #0f1426;
-      border: 1px solid #2a2f4b;
-      color: #e4e6eb;
-      padding: 0.5rem;
-      border-radius: 8px;
-      margin: 0.3rem;
-    }
-    .lock-overlay button, .age-overlay button {
-      background: #0ea5e9;
-      border: none;
-      padding: 0.3rem 1rem;
-      border-radius: 30px;
-      color: white;
-      cursor: pointer;
-    }
+    .lock-overlay, .age-overlay { background: rgba(0,0,0,0.85); padding: 1rem; border-radius: 12px; text-align: center; margin: 0.5rem 0; }
+    .lock-overlay input, .age-overlay input { background: #0f1426; border: 1px solid #2a2f4b; color: #e4e6eb; padding: 0.5rem; border-radius: 8px; margin: 0.3rem; }
+    .lock-overlay button, .age-overlay button { background: #0ea5e9; border: none; padding: 0.3rem 1rem; border-radius: 30px; color: white; cursor: pointer; }
     .lock-overlay button:hover, .age-overlay button:hover { background: #0284c7; }
 
-    /* ===== LOADING ===== */
-    .threads-loading {
-      text-align: center;
-      padding: 2rem;
-      color: #7a82a0;
-    }
+    .threads-loading { text-align: center; padding: 2rem; color: #7a82a0; }
     .threads-loading i { font-size: 2rem; display: block; margin-bottom: 0.5rem; color: #38bdf8; }
 
     .hidden { display: none !important; }
@@ -461,86 +421,316 @@
       .create-thread .row { flex-direction: column; align-items: stretch; }
       .create-thread .row input { flex: auto; }
       .btn-primary { width: 100%; justify-content: center; }
-      .delete-btn { font-size: 0.65rem; padding: 0.15rem 0.6rem; }
+      .filter-row { flex-direction: column; align-items: stretch; }
+      .file-input-wrapper { flex-wrap: wrap; }
     }
 
-    /* ===== CONFIRMATION MODAL ===== */
-    .modal-overlay {
+    .auth-modal {
       position: fixed;
       inset: 0;
-      background: rgba(15,23,42,0.6);
-      backdrop-filter: blur(4px);
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(8px);
       display: none;
       align-items: center;
       justify-content: center;
-      z-index: 9999;
+      z-index: 10000;
       padding: 1.5rem;
-      animation: fadeIn 0.2s ease;
     }
-    .modal-overlay.active { display: flex; }
-    .modal-box {
+    .auth-modal.active { display: flex; }
+    .auth-box {
       background: #1a1a2e;
       padding: 2rem 2rem 1.8rem;
       border-radius: 1.25rem;
-      max-width: 380px;
+      max-width: 400px;
       width: 100%;
-      text-align: center;
+      border: 1px solid rgba(255,255,255,0.06);
       box-shadow: 0 24px 60px rgba(0,0,0,0.5);
       animation: slideUp 0.25s ease;
-      border: 1px solid rgba(255,255,255,0.06);
     }
-    .modal-box h3 { font-size: 1.25rem; color: #fff; margin-bottom: 0.4rem; }
-    .modal-box p { color: #b0b8c8; font-size: 0.95rem; margin-bottom: 1.5rem; }
-    .modal-actions { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
-    .modal-actions button {
-      padding: 0.5rem 1.8rem;
-      border-radius: 40px;
-      border: none;
-      font-weight: 500;
-      font-size: 0.9rem;
+    .auth-box h2 { font-size: 1.8rem; font-weight: 700; color: #fff; margin-bottom: 0.2rem; text-align: center; }
+    .auth-box .sub { color: #7a82a0; text-align: center; margin-bottom: 1.5rem; font-size: 0.95rem; }
+    .auth-box input { width: 100%; padding: 0.7rem 1rem; margin-bottom: 0.8rem; background: #0f1426; border: 1px solid #2a2f4b; border-radius: 12px; color: #e4e6eb; font-size: 1rem; }
+    .auth-box input:focus { outline: none; border-color: #38bdf8; }
+    .auth-box .auth-btn { width: 100%; padding: 0.7rem; border: none; border-radius: 40px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.2s; color: #fff; background: linear-gradient(135deg, #0ea5e9, #06b6d4); }
+    .auth-box .auth-btn:hover { transform: scale(1.01); box-shadow: 0 0 20px rgba(14,165,233,0.3); }
+    .auth-box .auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .auth-box .auth-switch { text-align: center; margin-top: 1rem; color: #7a82a0; font-size: 0.9rem; }
+    .auth-box .auth-switch a { color: #38bdf8; cursor: pointer; text-decoration: none; }
+    .auth-box .auth-switch a:hover { text-decoration: underline; }
+    .auth-box .auth-error { color: #f43f5e; font-size: 0.85rem; text-align: center; margin-bottom: 0.5rem; min-height: 1.2rem; }
+    .auth-box .auth-close { float: right; background: none; border: none; color: #aaa; font-size: 1.8rem; cursor: pointer; transition: 0.2s; line-height: 1; }
+    .auth-box .auth-close:hover { color: #fff; }
+
+    .tab-btn {
+      background: #13172b;
+      border: 1px solid #2a2f4b;
+      padding: 0.5rem 1.2rem;
+      border-radius: 30px;
+      color: #e4e6eb;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: 0.2s;
+      font-family: inherit;
+      font-size: 0.95rem;
+    }
+    .tab-btn:hover { background: #1e2648; border-color: #3a4065; }
+    .tab-btn.active { background: #1e2648; border-color: #38bdf8; color: #fff; }
+    .members-tab { background: linear-gradient(135deg, #fbbf24, #f59e0b) !important; border-color: transparent !important; color: #0b0d17 !important; font-weight: 700 !important; }
+    .members-tab:hover { background: linear-gradient(135deg, #fcd34d, #d97706) !important; color: #0b0d17 !important; }
+    .members-tab.logged-in { background: linear-gradient(135deg, #2dd4bf, #0ea5e9) !important; color: #fff !important; }
+    .members-tab.logged-in:hover { background: linear-gradient(135deg, #5eead4, #38bdf8) !important; }
+    .tabs-container { display: flex; gap: 0.4rem; margin-bottom: 1rem; flex-wrap: wrap; }
+
+    /* Admin toggle button in tabs */
+    .admin-toggle-btn {
+      background: linear-gradient(135deg, #ff0033, #cc0033) !important;
+      border-color: #ff0033 !important;
+      color: #fff !important;
+      font-weight: 700 !important;
+      display: none !important;
+    }
+    .admin-toggle-btn.active {
+      display: inline-block !important;
+      box-shadow: 0 0 30px rgba(255,0,51,0.4);
+    }
+    .admin-toggle-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 40px rgba(255,0,51,0.6);
+    }
+
+    /* Admin Settings Panel */
+    .admin-settings-panel {
+      background: #1a1a2e;
+      border: 2px solid #ff0033;
+      border-radius: 16px;
+      padding: 1rem 1.2rem;
+      margin-bottom: 1rem;
+      display: none;
+      box-shadow: 0 0 40px rgba(255,0,51,0.1);
+    }
+    .admin-settings-panel.visible {
+      display: block;
+      animation: fadeUp 0.3s ease;
+    }
+    .admin-settings-panel h4 {
+      color: #ff0033;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .admin-settings-panel .admin-stat {
+      font-size: 0.8rem;
+      color: #aaa;
+      padding: 0.2rem 0;
+    }
+    .admin-settings-panel .admin-stat span { color: #38bdf8; font-weight: 600; }
+    .admin-settings-panel .admin-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .admin-settings-panel .admin-actions button {
+      background: #1e2648;
+      border: 1px solid #2a2f4b;
+      color: #e4e6eb;
+      padding: 0.3rem 0.8rem;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      transition: 0.2s;
       font-family: inherit;
     }
-    .modal-actions .btn-cancel { background: #2a2f4b; color: #b0b8c8; }
-    .modal-actions .btn-cancel:hover { background: #3a4065; }
-    .modal-actions .btn-danger { background: #dc2626; color: #fff; }
-    .modal-actions .btn-danger:hover { background: #b91c1c; }
+    .admin-settings-panel .admin-actions button:hover {
+      background: #2a3360;
+      border-color: #38bdf8;
+    }
+    .admin-settings-panel .admin-actions .danger-btn {
+      border-color: #ff0033;
+      color: #ff0033;
+    }
+    .admin-settings-panel .admin-actions .danger-btn:hover {
+      background: #2a0f1a;
+      border-color: #ff0033;
+    }
 
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+    .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; margin-top: 1rem; }
+    .gallery-item { aspect-ratio: 1 / 1; background: rgba(255,255,255,0.04); border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); transition: 0.3s; cursor: pointer; position: relative; }
+    .gallery-item img { width: 100%; height: 100%; object-fit: cover; }
+    .gallery-item:hover { border-color: #0ea5e9; transform: scale(1.02); box-shadow: 0 0 30px rgba(14,165,233,0.15); }
+
+    .library-list { list-style: none; padding: 0; }
+    .library-list li { padding: 0.8rem 1.2rem; margin-bottom: 0.6rem; background: rgba(255,255,255,0.02); border-radius: 12px; border-left: 3px solid #2dd4bf; }
+    .library-list li a { color: #94a3b8; text-decoration: none; font-size: 1.05rem; transition: 0.2s; display: block; }
+    .library-list li a:hover { color: #38bdf8; padding-left: 6px; }
+
+    .members-area {
+      background: #13172b;
+      border-radius: 16px;
+      padding: 1.5rem;
+      border: 1px solid #2a2f4b;
+      margin-top: 0.5rem;
     }
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(30px) scale(0.96); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
+    .members-area h2 { font-size: 1.4rem; font-weight: 600; margin-bottom: 0.5rem; color: #2dd4bf; }
+    .members-area .member-create { background: #0f1426; border-radius: 12px; padding: 1rem; margin-bottom: 1rem; border: 1px solid #1e2648; }
+    .members-area .member-create input, .members-area .member-create textarea, .members-area .member-create select {
+      width: 100%; padding: 0.5rem 0.8rem; margin-bottom: 0.5rem; background: #0b0d17; border: 1px solid #2a2f4b; border-radius: 8px; color: #e4e6eb; font-size: 0.95rem;
     }
+    .members-area .member-create input:focus, .members-area .member-create textarea:focus, .members-area .member-create select:focus { outline: none; border-color: #38bdf8; }
+    .members-area .member-create textarea { min-height: 60px; resize: vertical; }
+    .members-area .member-thread {
+      background: #0f1426;
+      border-radius: 12px;
+      padding: 0.8rem 1rem;
+      margin-bottom: 0.8rem;
+      border: 1px solid #1e2648;
+    }
+    .members-area .member-thread .author { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.2rem; flex-wrap: wrap; }
+    .members-area .member-thread .author img { width: 28px; height: 28px; border-radius: 50%; background: #1e2648; }
+    .members-area .member-thread .author .name { font-weight: 600; font-size: 0.85rem; }
+    .members-area .member-thread .author .time { font-size: 0.65rem; color: #7a82a0; margin-left: auto; }
+    .members-area .member-thread .author .tag-badge { background: #1e2648; padding: 0.1rem 0.4rem; border-radius: 8px; font-size: 0.6rem; color: #88b0f0; }
+    .members-area .member-thread h3 { font-size: 1.05rem; font-weight: 600; margin: 0.2rem 0 0.2rem; }
+    .members-area .member-thread .content { font-size: 0.9rem; color: #c8cee0; line-height: 1.4; }
+    .members-area .member-thread .actions {
+      display: flex; gap: 0.8rem; font-size: 0.75rem; color: #7a82a0; margin-top: 0.3rem; border-top: 1px solid #1e2648; padding-top: 0.3rem; flex-wrap: wrap; align-items: center;
+    }
+    .members-area .member-thread .actions span { display: flex; align-items: center; gap: 0.2rem; cursor: pointer; }
+    .members-area .member-thread .actions .liked { color: #f43f5e; }
+    .members-area .member-thread .actions .edit-btn, .members-area .member-thread .actions .delete-btn {
+      background: none; border: none; color: #7a82a0; cursor: pointer; font-size: 0.75rem; padding: 0 0.2rem; transition: color 0.2s;
+    }
+    .members-area .member-thread .actions .edit-btn:hover { color: #38bdf8; }
+    .members-area .member-thread .actions .delete-btn:hover { color: #f43f5e; }
+    .members-area .member-thread .actions .admin-label {
+      font-size: 0.55rem;
+      color: #ff0033;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: rgba(255,0,51,0.12);
+      padding: 0.05rem 0.4rem;
+      border-radius: 10px;
+      border: 1px solid rgba(255,0,51,0.2);
+    }
+
+    .member-replies { margin-top: 0.5rem; padding-left: 1rem; border-left: 2px solid #2a2f4b; }
+    .member-reply {
+      background: #0b0d17;
+      border-radius: 8px;
+      padding: 0.5rem 0.8rem;
+      margin-bottom: 0.4rem;
+      border: 1px solid #1a1a2e;
+    }
+    .member-reply .author { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.1rem; }
+    .member-reply .author img { width: 20px; height: 20px; border-radius: 50%; background: #1e2648; }
+    .member-reply .author .name { font-weight: 500; font-size: 0.75rem; }
+    .member-reply .author .time { font-size: 0.6rem; color: #7a82a0; margin-left: auto; }
+    .member-reply .content { font-size: 0.85rem; color: #c8cee0; }
+    .member-reply .actions { display: flex; gap: 0.4rem; margin-top: 0.2rem; flex-wrap: wrap; align-items: center; }
+    .member-reply .actions .edit-btn, .member-reply .actions .delete-btn {
+      background: none; border: none; color: #7a82a0; cursor: pointer; font-size: 0.7rem; padding: 0 0.2rem; transition: color 0.2s;
+    }
+    .member-reply .actions .edit-btn:hover { color: #38bdf8; }
+    .member-reply .actions .delete-btn:hover { color: #f43f5e; }
+    .member-reply .actions .admin-label {
+      font-size: 0.5rem;
+      color: #ff0033;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: rgba(255,0,51,0.12);
+      padding: 0.05rem 0.3rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255,0,51,0.2);
+    }
+
+    .member-reply-form { display: flex; gap: 0.3rem; margin-top: 0.4rem; flex-wrap: wrap; }
+    .member-reply-form input, .member-reply-form textarea {
+      flex: 1; min-width: 60px; padding: 0.3rem 0.6rem; background: #0b0d17; border: 1px solid #2a2f4b; border-radius: 20px; color: #e4e6eb; font-size: 0.8rem;
+    }
+    .member-reply-form textarea { flex-basis: 100%; min-height: 30px; border-radius: 8px; }
+    .member-reply-form button { background: #1e2648; border: none; padding: 0.3rem 0.8rem; border-radius: 30px; color: #88b0f0; font-weight: 600; cursor: pointer; font-size: 0.75rem; }
+    .member-reply-form button:hover { background: #2a3360; color: #fff; }
+
+    .signout-btn { margin-top: 1rem; background: #dc2626; border: none; padding: 0.4rem 1.2rem; border-radius: 30px; color: #fff; cursor: pointer; font-weight: 500; transition: 0.2s; font-family: inherit; }
+    .signout-btn:hover { background: #b91c1c; }
+
+    .fullscreen-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10001;
+      padding: 1.5rem;
+    }
+    .fullscreen-overlay.active { display: flex; }
+    .fullscreen-overlay img { max-width: 95%; max-height: 90vh; object-fit: contain; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.8); }
+    .fullscreen-overlay .close-btn { position: absolute; top: 1.5rem; right: 2rem; background: none; border: none; color: #fff; font-size: 2.5rem; cursor: pointer; opacity: 0.7; transition: 0.2s; z-index: 10; }
+    .fullscreen-overlay .close-btn:hover { opacity: 1; transform: rotate(90deg); }
+    .fullscreen-overlay .caption { position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.6); color: rgba(255,255,255,0.8); padding: 0.4rem 1.2rem; border-radius: 30px; font-size: 0.85rem; backdrop-filter: blur(4px); pointer-events: none; white-space: nowrap; }
+
+    .edit-form textarea, .edit-form input[type="text"] {
+      width: 100%;
+      padding: 0.5rem;
+      background: #0f1426;
+      border: 1px solid #2a2f4b;
+      border-radius: 8px;
+      color: #e4e6eb;
+      font-size: 0.95rem;
+      margin-bottom: 0.3rem;
+    }
+    .edit-form .save-btn {
+      background: #0ea5e9;
+      border: none;
+      padding: 0.2rem 1rem;
+      border-radius: 30px;
+      color: white;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    .edit-form .save-btn:hover { background: #0284c7; }
+    .edit-form .cancel-btn {
+      background: transparent;
+      border: 1px solid #7a82a0;
+      padding: 0.2rem 1rem;
+      border-radius: 30px;
+      color: #7a82a0;
+      cursor: pointer;
+      font-size: 0.8rem;
+      margin-left: 0.5rem;
+    }
+    .edit-form .cancel-btn:hover { background: #2a2f4b; }
   </style>
 </head>
 <body>
 
-  <!-- ===== INTRO OVERLAY ===== -->
   <div class="intro-overlay">
     <div class="intro-logo"><i class="fas fa-globe-americas"></i> World</div>
     <div class="intro-text">Your universe awaits</div>
     <div class="intro-loader"></div>
   </div>
 
-  <!-- ===== MAIN CONTENT ===== -->
   <div class="main-content">
     <div class="container">
 
-      <!-- Top Bar -->
       <div class="top-bar">
         <div class="logo"><i class="fas fa-globe-americas"></i> World</div>
-        <div class="visitor-badge" id="visitorBadge">
-          <i class="fas fa-user"></i>
-          <span id="visitorCount">0</span>
-        </div>
+        <div class="visitor-badge" id="visitorBadge"><i class="fas fa-user"></i><span id="visitorCount">0</span></div>
         <div class="auth-badge" id="auth-status"><i class="fas fa-user-secret"></i> Anonymous</div>
       </div>
 
-      <!-- Stats -->
+      <div class="tabs-container">
+        <button class="tab-btn active" data-tab="home">🌍 Home</button>
+        <button class="tab-btn" data-tab="games">🎮 Games</button>
+        <button class="tab-btn" data-tab="gallery">🖼 Gallery</button>
+        <button class="tab-btn" data-tab="library">📚 Library</button>
+        <button class="tab-btn members-tab" id="membersTab">🔒 Members-Only</button>
+        <button class="tab-btn admin-toggle-btn" id="adminToggleBtn">⚙️ Admin</button>
+      </div>
+
       <div class="stats-row">
         <div class="stat-item"><span class="num" id="stat-threads">0</span><span class="label">Threads</span></div>
         <div class="stat-item"><span class="num" id="stat-replies">0</span><span class="label">Replies</span></div>
@@ -548,68 +738,452 @@
         <div class="stat-item"><span class="num" id="stat-total">0</span><span class="label">Total Visits</span></div>
       </div>
 
-      <!-- Create Thread -->
-      <div class="create-thread">
-        <h3><i class="fas fa-pen-fancy" style="color:#2dd4bf;"></i> New thread</h3>
-        <input type="text" id="thread-title" placeholder="Title..." />
-        <textarea id="thread-content" placeholder="Write your first post..."></textarea>
-        <div class="file-input-wrapper">
-          <input type="file" id="thread-image-input" accept="image/*" />
-          <label for="thread-image-input"><i class="fas fa-image"></i> Add image</label>
-          <img id="thread-image-preview" class="preview" alt="preview" />
-        </div>
-        <!-- Conditional media upload for admin/mod -->
-        <div class="file-input-wrapper conditional" id="thread-media-wrapper">
-          <input type="file" id="thread-media-input" accept="video/*,.zip,.rar,.7z,.pdf,.doc,.docx,.txt" />
-          <label for="thread-media-input"><i class="fas fa-video"></i> Add video/file (admin/mod only)</label>
-          <span id="thread-media-filename" style="font-size:0.8rem; color:#7a82a0; margin-left:0.5rem;"></span>
-        </div>
-        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.5rem 0;">
-          <label style="display: flex; align-items: center; gap: 0.3rem; color: #aaa;">
-            <input type="checkbox" id="thread-blur" /> Blur image
-          </label>
-          <input type="text" id="thread-password" placeholder="Password lock (optional)" style="flex:1; min-width:120px; background:#0f1426; border:1px solid #2a2f4b; border-radius:12px; color:#e4e6eb; padding:0.6rem 0.9rem;" />
-          <input type="number" id="thread-age" placeholder="Min age (0=none)" style="width:100px; background:#0f1426; border:1px solid #2a2f4b; border-radius:12px; color:#e4e6eb; padding:0.6rem 0.9rem;" />
-        </div>
-        <div class="row" style="display:flex; flex-wrap:wrap; gap:0.6rem; align-items:center;">
-          <input type="text" id="author-name" placeholder="Your name (optional)" style="flex:2; min-width:120px;" />
-          <button class="btn-primary" id="create-thread-btn"><i class="fas fa-paper-plane"></i> Post</button>
-          <span id="thread-status" class="status-msg" style="display:none;"></span>
+      <!-- ADMIN SETTINGS PANEL -->
+      <div class="admin-settings-panel" id="adminSettingsPanel">
+        <h4><i class="fas fa-shield-alt"></i> Admin Control Panel</h4>
+        <div class="admin-stat">👤 Logged in as: <span id="adminEmailDisplay">hungbbcllc@gmail.com</span></div>
+        <div class="admin-stat">📊 Total threads: <span id="adminTotalThreads">0</span></div>
+        <div class="admin-stat">💬 Total replies: <span id="adminTotalReplies">0</span></div>
+        <div class="admin-stat">👥 Total users: <span id="adminTotalUsers">0</span></div>
+        <div class="admin-actions">
+          <button onclick="loadThreads(); loadMemberThreads(); updateAdminStats();">🔄 Refresh All</button>
+          <button class="danger-btn" onclick="if(confirm('Clear all public threads and replies?')){clearAllPublic();}">🗑️ Clear Public</button>
+          <button class="danger-btn" onclick="if(confirm('Clear all member threads and replies?')){clearAllMember();}">🗑️ Clear Members</button>
         </div>
       </div>
 
-      <!-- Threads Feed -->
-      <div id="threads-container"></div>
+      <!-- HOME PANEL -->
+      <div class="panel active" id="panel-home">
+        <div class="create-thread">
+          <h3><i class="fas fa-pen-fancy" style="color:#2dd4bf;"></i> New thread</h3>
+          <input type="text" id="thread-title" placeholder="Title..." />
+          <textarea id="thread-content" placeholder="Write your first post..."></textarea>
+          <select id="thread-tag" class="tag-select" required>
+            <option value="">Select a tag...</option>
+            <option value="Finance">Finance</option><option value="Gaming">Gaming</option>
+            <option value="Technology">Technology</option><option value="Marketing">Marketing</option>
+            <option value="Health">Health</option><option value="Travel">Travel</option>
+            <option value="Food">Food</option><option value="DIY">DIY</option>
+            <option value="Parenting">Parenting</option><option value="Productivity">Productivity</option>
+            <option value="Pets">Pets</option><option value="Fashion">Fashion</option>
+          </select>
+          <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.5rem 0;">
+            <label style="display: flex; align-items: center; gap: 0.3rem; color: #aaa;">
+              <input type="checkbox" id="thread-blur" /> Blur image
+            </label>
+            <input type="text" id="thread-password" placeholder="Password lock (optional)" style="flex:1; min-width:120px; background:#0f1426; border:1px solid #2a2f4b; border-radius:12px; color:#e4e6eb; padding:0.6rem 0.9rem;" />
+            <input type="number" id="thread-age" placeholder="Min age (0=none)" style="width:100px; background:#0f1426; border:1px solid #2a2f4b; border-radius:12px; color:#e4e6eb; padding:0.6rem 0.9rem;" />
+          </div>
+          <div class="file-input-wrapper">
+            <input type="file" id="thread-image-input" accept="image/*" />
+            <label for="thread-image-input"><i class="fas fa-image"></i> Add image</label>
+            <img id="thread-image-preview" class="preview" alt="preview" />
+            <span class="filename" id="thread-image-filename"></span>
+          </div>
+          <div class="file-input-wrapper">
+            <input type="file" id="thread-media-input" accept="video/*,.zip,.rar,.7z,.pdf,.doc,.docx,.txt" />
+            <label for="thread-media-input"><i class="fas fa-video"></i> Add video or file</label>
+            <span class="filename" id="thread-media-filename"></span>
+          </div>
+          <div class="row" style="display:flex; flex-wrap:wrap; gap:0.6rem; align-items:center;">
+            <input type="text" id="author-name" placeholder="Your name (optional)" style="flex:2; min-width:120px;" />
+            <button class="btn-primary" id="create-thread-btn"><i class="fas fa-paper-plane"></i> Post</button>
+            <span id="thread-status" class="status-msg" style="display:none;"></span>
+          </div>
+        </div>
+
+        <div class="filter-row">
+          <span style="font-size:0.85rem; color:#7a82a0;">Filter by tag:</span>
+          <select id="publicTagFilter">
+            <option value="all">All tags</option>
+            <option value="Finance">Finance</option><option value="Gaming">Gaming</option>
+            <option value="Technology">Technology</option><option value="Marketing">Marketing</option>
+            <option value="Health">Health</option><option value="Travel">Travel</option>
+            <option value="Food">Food</option><option value="DIY">DIY</option>
+            <option value="Parenting">Parenting</option><option value="Productivity">Productivity</option>
+            <option value="Pets">Pets</option><option value="Fashion">Fashion</option>
+          </select>
+        </div>
+
+        <div id="threads-container"></div>
+      </div>
+
+      <div class="panel" id="panel-games">
+        <h2 style="font-weight:300; margin-bottom:1.2rem;">🎮 Games <span style="opacity:0.4;font-size:0.8rem;">(gaming discussions)</span></h2>
+        <p style="color:#7a82a0;">Game-related threads and discussions will appear here.</p>
+      </div>
+
+      <div class="panel" id="panel-gallery">
+        <h2 style="font-weight:300; margin-bottom:1.2rem;">🖼 Gallery</h2>
+        <div class="gallery-grid" id="galleryGrid">
+          <p style="color:#7a82a0; grid-column:1/-1; text-align:center;">Loading images...</p>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-library">
+        <h2 style="font-weight:300; margin-bottom:1.2rem;">📚 Library <span style="opacity:0.4;font-size:0.8rem;">(Productivity)</span></h2>
+        <div id="libraryContainer"><p style="color:#7a82a0;">Loading productivity threads...</p></div>
+      </div>
+
+      <div class="panel" id="panel-members">
+        <div class="members-area" id="membersArea">
+          <div id="memberContent">
+            <h2>🔒 Members Area</h2>
+            <p style="color:#7a82a0; margin-bottom:1rem;">Welcome, <span id="memberEmail"></span>! Post and reply here – only members can see this.</p>
+            <div class="member-create" id="memberCreateThread">
+              <input type="text" id="member-thread-title" placeholder="Thread title..." />
+              <textarea id="member-thread-content" placeholder="Write your post..."></textarea>
+              <select id="member-thread-tag" class="tag-select" required>
+                <option value="">Select a tag...</option>
+                <option value="Finance">Finance</option><option value="Gaming">Gaming</option>
+                <option value="Technology">Technology</option><option value="Marketing">Marketing</option>
+                <option value="Health">Health</option><option value="Travel">Travel</option>
+                <option value="Food">Food</option><option value="DIY">DIY</option>
+                <option value="Parenting">Parenting</option><option value="Productivity">Productivity</option>
+                <option value="Pets">Pets</option><option value="Fashion">Fashion</option>
+              </select>
+              <div class="file-input-wrapper">
+                <input type="file" id="member-image-input" accept="image/*" />
+                <label for="member-image-input"><i class="fas fa-image"></i> Add image</label>
+                <img id="member-image-preview" class="preview" alt="preview" />
+                <span class="filename" id="member-image-filename"></span>
+              </div>
+              <div class="file-input-wrapper">
+                <input type="file" id="member-media-input" accept="video/*,.zip,.rar,.7z,.pdf,.doc,.docx,.txt" />
+                <label for="member-media-input"><i class="fas fa-video"></i> Add video or file</label>
+                <span class="filename" id="member-media-filename"></span>
+              </div>
+              <button class="btn-primary" id="member-create-btn" style="padding:0.4rem 1.2rem; font-size:0.9rem;">Post to Members</button>
+              <span id="member-thread-status" class="status-msg" style="display:none;"></span>
+            </div>
+            <div class="filter-row">
+              <span style="font-size:0.85rem; color:#7a82a0;">Filter:</span>
+              <select id="memberTagFilter">
+                <option value="all">All tags</option>
+                <option value="Finance">Finance</option><option value="Gaming">Gaming</option>
+                <option value="Technology">Technology</option><option value="Marketing">Marketing</option>
+                <option value="Health">Health</option><option value="Travel">Travel</option>
+                <option value="Food">Food</option><option value="DIY">DIY</option>
+                <option value="Parenting">Parenting</option><option value="Productivity">Productivity</option>
+                <option value="Pets">Pets</option><option value="Fashion">Fashion</option>
+              </select>
+            </div>
+            <div id="memberThreadsContainer"><p style="color:#7a82a0; text-align:center; padding:1rem;">Loading member threads...</p></div>
+            <button class="signout-btn" id="signoutBtn"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+          </div>
+          <div id="memberLoginPrompt" style="display:none; text-align:center; padding:2rem;">
+            <p style="color:#7a82a0;">🔒 Please <a id="memberLoginLink" style="color:#38bdf8; cursor:pointer;">sign in</a> to view and post in the Members Area.</p>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
-  <!-- ===== CONFIRMATION MODAL ===== -->
-  <div class="modal-overlay" id="confirmModal">
-    <div class="modal-box">
-      <h3>⚠️ Are you sure?</h3>
-      <p id="modalMsg">This action cannot be undone.</p>
-      <div class="modal-actions">
-        <button class="btn-cancel" id="modalCancel">Cancel</button>
-        <button class="btn-danger" id="modalConfirm">Yes, delete</button>
+  <div class="auth-modal" id="authModal">
+    <div class="auth-box">
+      <button class="auth-close" id="authClose">&times;</button>
+      <h2 id="authTitle">Sign In</h2>
+      <p class="sub" id="authSub">Enter your credentials to access members-only content.</p>
+      <div class="auth-error" id="authError"></div>
+      <input type="email" id="authEmail" placeholder="Email" />
+      <input type="password" id="authPassword" placeholder="Password" />
+      <button class="auth-btn" id="authSubmit">Sign In</button>
+      <div class="auth-switch">
+        <span id="authSwitchText">Don't have an account?</span>
+        <a id="authSwitchLink">Sign Up</a>
       </div>
     </div>
+  </div>
+
+  <div class="fullscreen-overlay" id="fullscreenOverlay">
+    <button class="close-btn" id="fullscreenClose">&times;</button>
+    <img id="fullscreenImage" src="" alt="Fullscreen view" />
+    <div class="caption" id="fullscreenCaption"></div>
   </div>
 
   <script>
-    // ============================================================
-    // RESTORE SCROLL AFTER INTRO
-    // ============================================================
     setTimeout(() => { document.body.style.overflow = "auto"; }, 3300);
 
-    // ============================================================
-    // SUPABASE SETUP
-    // ============================================================
     const SUPABASE_URL = 'https://divcsisxjrbruduyophx.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_PSpZ4GImD-mCAau3F2U6LA_W757gdMM';
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // ============================================================
-    // SESSION ID
+    // FULLSCREEN GALLERY
+    // ============================================================
+    const fsOverlay = document.getElementById('fullscreenOverlay');
+    const fsImage = document.getElementById('fullscreenImage');
+    const fsCaption = document.getElementById('fullscreenCaption');
+    const fsClose = document.getElementById('fullscreenClose');
+
+    function openFullscreen(imgSrc, caption = '') {
+      fsImage.src = imgSrc;
+      fsCaption.textContent = caption;
+      fsOverlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeFullscreen() {
+      fsOverlay.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    fsClose.addEventListener('click', closeFullscreen);
+    fsOverlay.addEventListener('click', function(e) { if (e.target === this) closeFullscreen(); });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeFullscreen(); });
+
+    // ============================================================
+    // AUTH
+    // ============================================================
+    let currentUser = null, currentSession = null;
+
+    const authModal = document.getElementById('authModal');
+    const authClose = document.getElementById('authClose');
+    const authTitle = document.getElementById('authTitle');
+    const authSub = document.getElementById('authSub');
+    const authEmail = document.getElementById('authEmail');
+    const authPassword = document.getElementById('authPassword');
+    const authSubmit = document.getElementById('authSubmit');
+    const authError = document.getElementById('authError');
+    const authSwitchLink = document.getElementById('authSwitchLink');
+    const authSwitchText = document.getElementById('authSwitchText');
+    const membersTab = document.getElementById('membersTab');
+    const memberEmail = document.getElementById('memberEmail');
+    const signoutBtn = document.getElementById('signoutBtn');
+    const memberContent = document.getElementById('memberContent');
+    const memberLoginPrompt = document.getElementById('memberLoginPrompt');
+    const memberLoginLink = document.getElementById('memberLoginLink');
+    const adminToggleBtn = document.getElementById('adminToggleBtn');
+    const adminSettingsPanel = document.getElementById('adminSettingsPanel');
+
+    let isLoginMode = true;
+    const allPanels = ['home', 'games', 'gallery', 'library', 'members'];
+    const panelElements = {
+      home: document.getElementById('panel-home'),
+      games: document.getElementById('panel-games'),
+      gallery: document.getElementById('panel-gallery'),
+      library: document.getElementById('panel-library'),
+      members: document.getElementById('panel-members')
+    };
+    const tabButtons = document.querySelectorAll('.tab-btn:not(#membersTab):not(#adminToggleBtn)');
+    const membersTabBtn = membersTab;
+
+    // ---- Admin check ----
+    function isAdmin() {
+      return currentUser && currentUser.email === 'hungbbcllc@gmail.com';
+    }
+
+    function isOwner(authorId) {
+      return currentUser && currentUser.id === authorId;
+    }
+
+    // ---- Update admin UI ----
+    function updateAdminUI() {
+      const admin = isAdmin();
+      const authBadge = document.getElementById('auth-status');
+      if (admin) {
+        authBadge.innerHTML = `<i class="fas fa-crown"></i> Admin: ${currentUser.email}`;
+        authBadge.className = 'auth-badge admin-badge-top';
+        adminToggleBtn.classList.add('active');
+        adminSettingsPanel.classList.add('visible');
+        updateAdminStats();
+      } else {
+        if (currentUser) {
+          authBadge.innerHTML = `<i class="fas fa-check-circle" style="color:#2dd4bf;"></i> ${currentUser.email}`;
+          authBadge.className = 'auth-badge';
+        } else {
+          authBadge.innerHTML = `<i class="fas fa-user-secret"></i> Anonymous`;
+          authBadge.className = 'auth-badge';
+        }
+        adminToggleBtn.classList.remove('active');
+        adminSettingsPanel.classList.remove('visible');
+      }
+    }
+
+    // ---- Admin stats ----
+    async function updateAdminStats() {
+      if (!isAdmin()) return;
+      try {
+        const { count: threads } = await supabaseClient.from('threads').select('*', { count: 'exact', head: true });
+        const { count: posts } = await supabaseClient.from('posts').select('*', { count: 'exact', head: true });
+        const { count: users } = await supabaseClient.auth.admin.listUsers().then(r => ({ count: r.data?.users?.length || 0 }));
+        document.getElementById('adminTotalThreads').textContent = threads || 0;
+        document.getElementById('adminTotalReplies').textContent = posts || 0;
+        document.getElementById('adminTotalUsers').textContent = users || 0;
+      } catch(e) { /* ignore */ }
+    }
+
+    // ---- Admin clear functions ----
+    window.clearAllPublic = async function() {
+      try {
+        await supabaseClient.from('threads').delete().neq('id', 0);
+        await supabaseClient.from('posts').delete().neq('id', 0);
+        loadThreads();
+        updateAdminStats();
+        alert('✅ All public threads and replies cleared.');
+      } catch(e) { alert('❌ Error: ' + e.message); }
+    };
+
+    window.clearAllMember = async function() {
+      try {
+        await supabaseClient.from('member_threads').delete().neq('id', 0);
+        await supabaseClient.from('member_posts').delete().neq('id', 0);
+        loadMemberThreads();
+        updateAdminStats();
+        alert('✅ All member threads and replies cleared.');
+      } catch(e) { alert('❌ Error: ' + e.message); }
+    };
+
+    // ---- Auth ----
+    async function checkAuth() {
+      const { data: { session }, error } = await supabaseClient.auth.getSession();
+      if (error) { console.error('Auth error:', error); return; }
+      if (session) {
+        currentSession = session;
+        currentUser = session.user;
+        updateUIForLoggedIn();
+      } else {
+        currentUser = null;
+        currentSession = null;
+        updateUIForLoggedOut();
+      }
+      updateAdminUI();
+      loadThreads();
+      if (currentUser) loadMemberThreads();
+    }
+
+    function showPanel(panelId) {
+      allPanels.forEach(id => { const panel = panelElements[id]; if (panel) panel.classList.toggle('active', id === panelId); });
+      tabButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.tab === panelId));
+      membersTabBtn.classList.toggle('active', panelId === 'members');
+      if (panelId === 'members' && currentUser) loadMemberThreads();
+      if (panelId === 'gallery') loadGallery();
+      if (panelId === 'library') loadLibrary();
+    }
+
+    function updateUIForLoggedIn() {
+      membersTabBtn.textContent = '🔒 Members Area';
+      membersTabBtn.classList.add('logged-in');
+      memberEmail.textContent = currentUser.email;
+      memberContent.style.display = 'block';
+      memberLoginPrompt.style.display = 'none';
+      showPanel('members');
+    }
+
+    function updateUIForLoggedOut() {
+      membersTabBtn.textContent = '🔒 Members-Only';
+      membersTabBtn.classList.remove('logged-in');
+      memberContent.style.display = 'none';
+      memberLoginPrompt.style.display = 'block';
+      showPanel('home');
+    }
+
+    async function signIn(email, password) {
+      authSubmit.disabled = true; authError.textContent = '';
+      try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        currentUser = data.user; currentSession = data.session;
+        updateUIForLoggedIn();
+        updateAdminUI();
+        closeAuthModal();
+        loadThreads();
+        if (currentUser) loadMemberThreads();
+        alert('✅ Signed in successfully!');
+      } catch (err) { authError.textContent = '❌ ' + err.message; }
+      finally { authSubmit.disabled = false; }
+    }
+
+    async function signUp(email, password) {
+      authSubmit.disabled = true; authError.textContent = '';
+      try {
+        const { data, error } = await supabaseClient.auth.signUp({ email, password });
+        if (error) throw error;
+        if (data.user) {
+          alert('✅ Sign-up successful! Please check your email to confirm your account.');
+          isLoginMode = true; updateAuthForm();
+        }
+      } catch (err) { authError.textContent = '❌ ' + err.message; }
+      finally { authSubmit.disabled = false; }
+    }
+
+    async function signOut() {
+      const { error } = await supabaseClient.auth.signOut();
+      if (error) { alert('❌ Error signing out: ' + error.message); return; }
+      currentUser = null; currentSession = null;
+      updateUIForLoggedOut();
+      updateAdminUI();
+      loadThreads();
+      alert('✅ Signed out.');
+    }
+
+    function openAuthModal() {
+      authModal.classList.add('active');
+      authError.textContent = '';
+      authEmail.value = ''; authPassword.value = '';
+      isLoginMode = true; updateAuthForm();
+      authEmail.focus();
+    }
+    function closeAuthModal() { authModal.classList.remove('active'); }
+
+    function updateAuthForm() {
+      if (isLoginMode) {
+        authTitle.textContent = 'Sign In';
+        authSub.textContent = 'Enter your credentials to access members-only content.';
+        authSubmit.textContent = 'Sign In';
+        authSwitchText.textContent = "Don't have an account?";
+        authSwitchLink.textContent = 'Sign Up';
+      } else {
+        authTitle.textContent = 'Sign Up';
+        authSub.textContent = 'Create an account to access members-only content.';
+        authSubmit.textContent = 'Sign Up';
+        authSwitchText.textContent = 'Already have an account?';
+        authSwitchLink.textContent = 'Sign In';
+      }
+      authError.textContent = '';
+    }
+
+    authSwitchLink.addEventListener('click', () => { isLoginMode = !isLoginMode; updateAuthForm(); });
+    authClose.addEventListener('click', closeAuthModal);
+    authModal.addEventListener('click', (e) => { if (e.target === authModal) closeAuthModal(); });
+    authSubmit.addEventListener('click', async () => {
+      const email = authEmail.value.trim();
+      const password = authPassword.value.trim();
+      if (!email || !password) { authError.textContent = '❌ Please fill in all fields.'; return; }
+      if (password.length < 6) { authError.textContent = '❌ Password must be at least 6 characters.'; return; }
+      if (isLoginMode) await signIn(email, password);
+      else await signUp(email, password);
+    });
+    authPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') authSubmit.click(); });
+    authEmail.addEventListener('keydown', (e) => { if (e.key === 'Enter') authPassword.focus(); });
+    memberLoginLink.addEventListener('click', openAuthModal);
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const tab = this.dataset.tab;
+        showPanel(tab);
+        membersTabBtn.classList.remove('active');
+        if (tab === 'gallery') loadGallery();
+        if (tab === 'library') loadLibrary();
+      });
+    });
+
+    membersTabBtn.addEventListener('click', () => {
+      if (currentUser) { showPanel('members'); loadMemberThreads(); }
+      else { openAuthModal(); }
+    });
+
+    adminToggleBtn.addEventListener('click', function() {
+      if (!isAdmin()) { alert('Admin access required.'); return; }
+      adminSettingsPanel.classList.toggle('visible');
+      if (adminSettingsPanel.classList.contains('visible')) updateAdminStats();
+    });
+
+    signoutBtn.addEventListener('click', signOut);
+
+    // ============================================================
+    // SESSION & STATS
     // ============================================================
     function getSessionId() {
       let id = localStorage.getItem('forum_session_id');
@@ -620,14 +1194,9 @@
       return id;
     }
 
-    // ============================================================
-    // VISITOR TRACKING
-    // ============================================================
     async function updateActiveSession() {
       const sessionId = getSessionId();
-      const { error } = await supabaseClient
-        .from('active_sessions')
-        .upsert({ session_id: sessionId, last_active: new Date().toISOString() }, { onConflict: 'session_id' });
+      const { error } = await supabaseClient.from('active_sessions').upsert({ session_id: sessionId, last_active: new Date().toISOString() }, { onConflict: 'session_id' });
       if (error) console.error('Active session error:', error);
     }
 
@@ -646,25 +1215,15 @@
           document.getElementById('visitorCount').textContent = data.total_visits;
         }
       }
-
       const thirtySecondsAgo = new Date(Date.now() - 30000).toISOString();
-      const { count, error: countError } = await supabaseClient
-        .from('active_sessions')
-        .select('*', { count: 'exact', head: true })
-        .gt('last_active', thirtySecondsAgo);
-
-      if (!countError) {
-        document.getElementById('stat-online').textContent = count || 0;
-      }
+      const { count, error: countError } = await supabaseClient.from('active_sessions').select('*', { count: 'exact', head: true }).gt('last_active', thirtySecondsAgo);
+      if (!countError) { document.getElementById('stat-online').textContent = count || 0; }
     }
 
     let heartbeatInterval = null;
     function startHeartbeat() {
       updateActiveSession();
-      heartbeatInterval = setInterval(() => {
-        updateActiveSession();
-        updateStats();
-      }, 15000);
+      heartbeatInterval = setInterval(() => { updateActiveSession(); updateStats(); }, 15000);
     }
 
     // ============================================================
@@ -692,7 +1251,6 @@
     document.getElementById('author-name').addEventListener('input', function() { saveName(this.value); });
     document.getElementById('author-name').addEventListener('blur', function() { saveName(this.value); });
     document.getElementById('author-name').value = loadName();
-    function ensureNameSaved() { saveName(document.getElementById('author-name').value); }
 
     function getAvatar(name) {
       const initial = name && name.trim() ? name.charAt(0).toUpperCase() : '?';
@@ -715,16 +1273,6 @@
 
     function triggerHaptics() { if (navigator.vibrate) navigator.vibrate(10); }
 
-    // Upload file to Supabase Storage
-    async function uploadFile(file, folder = 'media') {
-      const fileName = `${Date.now()}_${file.name}`;
-      const filePath = `${folder}/${fileName}`;
-      const { data, error } = await supabaseClient.storage.from('images').upload(filePath, file);
-      if (error) { console.error('Upload error:', error); return null; }
-      const { data: publicUrlData } = supabaseClient.storage.from('images').getPublicUrl(filePath);
-      return publicUrlData.publicUrl;
-    }
-
     function setStatus(element, message, type = 'sending') {
       if (!element) return;
       element.textContent = message;
@@ -737,126 +1285,220 @@
 
     function getUserDisplay(name) {
       const trimmed = name ? name.trim() : '';
-      if (!trimmed) {
-        return { displayName: 'Unverified', role: 'unverified', badge: '<span class="unverified-badge">Unverified</span>' };
-      }
+      if (!trimmed) { return { displayName: 'Unverified', role: 'unverified', badge: '<span class="unverified-badge">Unverified</span>' }; }
       const lower = trimmed.toLowerCase();
-      if (lower === 'admin') {
-        return { displayName: trimmed, role: 'admin', badge: '<span class="admin-badge">Admin</span>' };
-      }
-      if (lower === 'mod') {
-        return { displayName: trimmed, role: 'mod', badge: '<span class="mod-badge">Mod</span>' };
-      }
+      if (lower === 'admin') { return { displayName: trimmed, role: 'admin', badge: '<span class="admin-badge">Admin</span>' }; }
+      if (lower === 'mod') { return { displayName: trimmed, role: 'mod', badge: '<span class="mod-badge">Mod</span>' }; }
       return { displayName: trimmed, role: 'user', badge: '' };
     }
 
-    // Check if user is admin or mod (case-insensitive)
-    function isAdminOrMod(name) {
-      const lower = name ? name.trim().toLowerCase() : '';
-      return lower === 'admin' || lower === 'mod';
-    }
-
-    // Check current user's admin/mod status
-    function currentUserIsAdminOrMod() {
-      return isAdminOrMod(getUserName());
-    }
-
-    // Show/hide conditional media upload based on author name
-    function toggleMediaUpload(authorName) {
-      const threadWrapper = document.getElementById('thread-media-wrapper');
-      if (threadWrapper) {
-        if (isAdminOrMod(authorName)) {
-          threadWrapper.classList.add('visible');
-        } else {
-          threadWrapper.classList.remove('visible');
-        }
-      }
-    }
-
-    // Listen to author name changes for thread creation
-    document.getElementById('author-name').addEventListener('input', function() {
-      toggleMediaUpload(this.value);
-    });
-    // Initial check
-    toggleMediaUpload(document.getElementById('author-name').value);
-
     // ============================================================
-    // DELETE FUNCTIONS (with modal)
+    // GALLERY & LIBRARY
     // ============================================================
-    let pendingDelete = null;
-
-    function openModal(message) {
-      document.getElementById('modalMsg').textContent = message;
-      document.getElementById('confirmModal').classList.add('active');
+    async function loadGallery() {
+      const container = document.getElementById('galleryGrid');
+      container.innerHTML = `<p style="color:#7a82a0; grid-column:1/-1; text-align:center;">Loading images...</p>`;
+      const { data: threads, error } = await supabaseClient.from('threads').select('image_url, id, title').not('image_url', 'is', null).order('created_at', { ascending: false });
+      if (error) { container.innerHTML = `<p style="color:#f43f5e; grid-column:1/-1;">❌ Error: ${error.message}</p>`; return; }
+      if (!threads || threads.length === 0) { container.innerHTML = `<p style="color:#7a82a0; grid-column:1/-1; text-align:center;">No images found.</p>`; return; }
+      let html = '';
+      threads.forEach(t => {
+        const caption = t.title ? `Image from: ${sanitizeInput(t.title)}` : '';
+        html += `<div class="gallery-item" onclick="openFullscreen('${t.image_url}', '${sanitizeInput(caption)}')"><img src="${t.image_url}" alt="${sanitizeInput(t.title || 'Image')}" loading="lazy" /></div>`;
+      });
+      container.innerHTML = html;
     }
 
-    function closeModal() {
-      document.getElementById('confirmModal').classList.remove('active');
-      pendingDelete = null;
-      document.body.style.overflow = '';
-    }
-
-    document.getElementById('modalCancel').addEventListener('click', closeModal);
-    document.getElementById('confirmModal').addEventListener('click', function(e) {
-      if (e.target === this) closeModal();
-    });
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') closeModal();
-    });
-
-    document.getElementById('modalConfirm').addEventListener('click', async function() {
-      if (!pendingDelete) return;
-      const { type, id, threadId } = pendingDelete;
-      let success = false;
-      let message = '';
-      try {
-        if (type === 'thread') {
-          const { error } = await supabaseClient.from('threads').delete().eq('id', id);
-          if (error) { message = 'Error: ' + error.message; }
-          else { success = true; message = 'Thread deleted.'; }
-        } else if (type === 'reply') {
-          const { error } = await supabaseClient.from('posts').delete().eq('id', id);
-          if (error) { message = 'Error: ' + error.message; }
-          else { success = true; message = 'Reply deleted.'; }
-        }
-      } catch (e) {
-        message = 'Error: ' + e.message;
-      }
-      closeModal();
-      if (success) {
-        alert(message);
-        if (type === 'reply') {
-          await viewThread(threadId);
-        }
-        loadThreads();
-      } else {
-        alert('❌ ' + message);
-      }
-    });
-
-    function requestDeleteThread(threadId) {
-      pendingDelete = { type: 'thread', id: threadId };
-      openModal('Delete this thread and all replies? This cannot be undone.');
-    }
-
-    function requestDeleteReply(threadId, replyId) {
-      pendingDelete = { type: 'reply', id: replyId, threadId: threadId };
-      openModal('Delete this reply? This cannot be undone.');
+    async function loadLibrary() {
+      const container = document.getElementById('libraryContainer');
+      container.innerHTML = `<p style="color:#7a82a0;">Loading productivity threads...</p>`;
+      const { data: threads, error } = await supabaseClient.from('threads').select('id, title, content, author_name, created_at, tag').eq('tag', 'Productivity').order('created_at', { ascending: false });
+      if (error) { container.innerHTML = `<p style="color:#f43f5e;">❌ Error: ${error.message}</p>`; return; }
+      if (!threads || threads.length === 0) { container.innerHTML = `<p style="color:#7a82a0;">No productivity threads yet. Start one in Home!</p>`; return; }
+      let html = '';
+      threads.forEach(t => {
+        const safeTitle = sanitizeInput(t.title);
+        const safeContent = sanitizeInput(t.content || '').substring(0, 150);
+        const author = sanitizeInput(t.author_name || 'Anonymous');
+        const date = new Date(t.created_at).toLocaleString();
+        html += `<div class="library-item" style="background:rgba(255,255,255,0.02); border-radius:12px; padding:0.8rem 1.2rem; margin-bottom:0.8rem; border-left:3px solid #2dd4bf;">
+          <h3 style="font-size:1rem; margin-bottom:0.2rem; color:#e4e6eb;">${safeTitle}</h3>
+          <div style="font-size:0.85rem; color:#b0b8c8; line-height:1.4;">${safeContent}${t.content && t.content.length > 150 ? '...' : ''}</div>
+          <div style="font-size:0.7rem; color:#7a82a0; margin-top:0.3rem;">By ${author} · ${date}</div>
+        </div>`;
+      });
+      container.innerHTML = html;
     }
 
     // ============================================================
-    // LOAD THREADS
+    // UPLOAD
+    // ============================================================
+    async function uploadFile(file, folder = 'media') {
+      const fileName = `${Date.now()}_${file.name}`;
+      const filePath = `${folder}/${fileName}`;
+      const { data, error } = await supabaseClient.storage.from('images').upload(filePath, file);
+      if (error) { console.error('Upload error:', error); return null; }
+      const { data: publicUrlData } = supabaseClient.storage.from('images').getPublicUrl(filePath);
+      return publicUrlData.publicUrl;
+    }
+
+    // ============================================================
+    // EDIT / DELETE FUNCTIONS
+    // ============================================================
+
+    // --- PUBLIC THREADS ---
+    window.editThread = function(threadId) {
+      const card = document.querySelector(`.thread-card[data-thread-id="${threadId}"]`);
+      if (!card) return;
+      const titleEl = card.querySelector('h2');
+      const contentEl = card.querySelector('.content');
+      const actionsEl = card.querySelector('.actions');
+      const editBtn = actionsEl.querySelector('.edit-btn');
+      if (!editBtn) return;
+      if (editBtn.dataset.editing === 'true') { loadThreads(); return; }
+      const currentTitle = titleEl.textContent;
+      const currentContent = contentEl.textContent;
+      titleEl.innerHTML = `<input type="text" id="edit-title-${threadId}" value="${currentTitle}" style="width:100%; background:#0f1426; border:1px solid #2a2f4b; border-radius:8px; color:#e4e6eb; padding:0.5rem; font-size:1.1rem;">`;
+      contentEl.innerHTML = `<textarea id="edit-content-${threadId}" style="width:100%; min-height:80px; background:#0f1426; border:1px solid #2a2f4b; border-radius:8px; color:#e4e6eb; padding:0.5rem;">${currentContent}</textarea>
+        <div style="margin-top:0.5rem;"><button class="save-btn" onclick="saveThreadEdit('${threadId}')">Save</button><button class="cancel-btn" onclick="loadThreads()">Cancel</button></div>`;
+      editBtn.dataset.editing = 'true';
+      editBtn.innerHTML = '<i class="fas fa-times"></i>';
+    };
+
+    window.saveThreadEdit = async function(threadId) {
+      const titleInput = document.getElementById(`edit-title-${threadId}`);
+      const contentInput = document.getElementById(`edit-content-${threadId}`);
+      const title = titleInput.value.trim();
+      const content = contentInput.value.trim();
+      if (!title) { alert('Title cannot be empty.'); return; }
+      const { error } = await supabaseClient.from('threads').update({ title, content }).eq('id', threadId);
+      if (error) { alert('❌ Error updating: ' + error.message); return; }
+      loadThreads();
+    };
+
+    window.deleteThread = async function(threadId) {
+      if (!confirm('Delete this thread and all its replies?')) return;
+      const { error } = await supabaseClient.from('threads').delete().eq('id', threadId);
+      if (error) { alert('❌ Error deleting: ' + error.message); return; }
+      loadThreads();
+    };
+
+    // --- PUBLIC POSTS (replies) ---
+    window.editPost = function(threadId, postId) {
+      const replyItem = document.querySelector(`.reply-item[data-post-id="${postId}"]`);
+      if (!replyItem) return;
+      const contentEl = replyItem.querySelector('.content');
+      const actionsEl = replyItem.querySelector('.actions');
+      const editBtn = actionsEl.querySelector('.edit-btn');
+      if (!editBtn) return;
+      if (editBtn.dataset.editing === 'true') { viewThread(threadId); return; }
+      const currentContent = contentEl.textContent;
+      contentEl.innerHTML = `<textarea id="edit-post-${postId}" style="width:100%; min-height:60px; background:#0f1426; border:1px solid #2a2f4b; border-radius:8px; color:#e4e6eb; padding:0.5rem;">${currentContent}</textarea>
+        <div style="margin-top:0.3rem;"><button class="save-btn" onclick="savePostEdit('${threadId}','${postId}')">Save</button><button class="cancel-btn" onclick="viewThread('${threadId}')">Cancel</button></div>`;
+      editBtn.dataset.editing = 'true';
+      editBtn.innerHTML = '<i class="fas fa-times"></i>';
+    };
+
+    window.savePostEdit = async function(threadId, postId) {
+      const contentInput = document.getElementById(`edit-post-${postId}`);
+      const content = contentInput.value.trim();
+      if (!content) { alert('Content cannot be empty.'); return; }
+      const { error } = await supabaseClient.from('posts').update({ content }).eq('id', postId);
+      if (error) { alert('❌ Error updating: ' + error.message); return; }
+      viewThread(threadId);
+      loadThreads();
+    };
+
+    window.deletePost = async function(threadId, postId) {
+      if (!confirm('Delete this reply?')) return;
+      const { error } = await supabaseClient.from('posts').delete().eq('id', postId);
+      if (error) { alert('❌ Error deleting: ' + error.message); return; }
+      viewThread(threadId);
+      loadThreads();
+    };
+
+    // --- MEMBER THREADS ---
+    window.editMemberThread = function(threadId) {
+      const card = document.querySelector(`.member-thread[data-thread-id="${threadId}"]`);
+      if (!card) return;
+      const titleEl = card.querySelector('h3');
+      const contentEl = card.querySelector('.content');
+      const actionsEl = card.querySelector('.actions');
+      const editBtn = actionsEl.querySelector('.edit-btn');
+      if (!editBtn) return;
+      if (editBtn.dataset.editing === 'true') { loadMemberThreads(); return; }
+      const currentTitle = titleEl.textContent;
+      const currentContent = contentEl.textContent;
+      titleEl.innerHTML = `<input type="text" id="edit-member-title-${threadId}" value="${currentTitle}" style="width:100%; background:#0f1426; border:1px solid #2a2f4b; border-radius:8px; color:#e4e6eb; padding:0.5rem; font-size:1.05rem;">`;
+      contentEl.innerHTML = `<textarea id="edit-member-content-${threadId}" style="width:100%; min-height:80px; background:#0f1426; border:1px solid #2a2f4b; border-radius:8px; color:#e4e6eb; padding:0.5rem;">${currentContent}</textarea>
+        <div style="margin-top:0.5rem;"><button class="save-btn" onclick="saveMemberThreadEdit('${threadId}')">Save</button><button class="cancel-btn" onclick="loadMemberThreads()">Cancel</button></div>`;
+      editBtn.dataset.editing = 'true';
+      editBtn.innerHTML = '<i class="fas fa-times"></i>';
+    };
+
+    window.saveMemberThreadEdit = async function(threadId) {
+      const titleInput = document.getElementById(`edit-member-title-${threadId}`);
+      const contentInput = document.getElementById(`edit-member-content-${threadId}`);
+      const title = titleInput.value.trim();
+      const content = contentInput.value.trim();
+      if (!title) { alert('Title cannot be empty.'); return; }
+      const { error } = await supabaseClient.from('member_threads').update({ title, content }).eq('id', threadId);
+      if (error) { alert('❌ Error updating: ' + error.message); return; }
+      loadMemberThreads();
+    };
+
+    window.deleteMemberThread = async function(threadId) {
+      if (!confirm('Delete this member thread and its replies?')) return;
+      const { error } = await supabaseClient.from('member_threads').delete().eq('id', threadId);
+      if (error) { alert('❌ Error deleting: ' + error.message); return; }
+      loadMemberThreads();
+    };
+
+    // --- MEMBER POSTS ---
+    window.editMemberPost = function(threadId, postId) {
+      const replyItem = document.querySelector(`.member-reply[data-post-id="${postId}"]`);
+      if (!replyItem) return;
+      const contentEl = replyItem.querySelector('.content');
+      const actionsEl = replyItem.querySelector('.actions');
+      const editBtn = actionsEl.querySelector('.edit-btn');
+      if (!editBtn) return;
+      if (editBtn.dataset.editing === 'true') { viewMemberThread(threadId); return; }
+      const currentContent = contentEl.textContent;
+      contentEl.innerHTML = `<textarea id="edit-member-post-${postId}" style="width:100%; min-height:60px; background:#0f1426; border:1px solid #2a2f4b; border-radius:8px; color:#e4e6eb; padding:0.5rem;">${currentContent}</textarea>
+        <div style="margin-top:0.3rem;"><button class="save-btn" onclick="saveMemberPostEdit('${threadId}','${postId}')">Save</button><button class="cancel-btn" onclick="viewMemberThread('${threadId}')">Cancel</button></div>`;
+      editBtn.dataset.editing = 'true';
+      editBtn.innerHTML = '<i class="fas fa-times"></i>';
+    };
+
+    window.saveMemberPostEdit = async function(threadId, postId) {
+      const contentInput = document.getElementById(`edit-member-post-${postId}`);
+      const content = contentInput.value.trim();
+      if (!content) { alert('Content cannot be empty.'); return; }
+      const { error } = await supabaseClient.from('member_posts').update({ content }).eq('id', postId);
+      if (error) { alert('❌ Error updating: ' + error.message); return; }
+      viewMemberThread(threadId);
+      loadMemberThreads();
+    };
+
+    window.deleteMemberPost = async function(threadId, postId) {
+      if (!confirm('Delete this reply?')) return;
+      const { error } = await supabaseClient.from('member_posts').delete().eq('id', postId);
+      if (error) { alert('❌ Error deleting: ' + error.message); return; }
+      viewMemberThread(threadId);
+      loadMemberThreads();
+    };
+
+    // ============================================================
+    // LOAD PUBLIC THREADS
     // ============================================================
     async function loadThreads() {
       const container = document.getElementById('threads-container');
       container.innerHTML = `<div class="threads-loading"><i class="fas fa-spinner fa-pulse"></i><span>Loading threads...</span></div>`;
-
-      const { data: threads, error } = await supabaseClient.from('threads').select('*').order('created_at', { ascending: false });
-      if (error) {
-        container.innerHTML = `<div class="thread-card" style="border-color:#f43f5e;"><p>❌ Error: ${error.message}</p></div>`;
-        return;
-      }
-
+      const tagFilter = document.getElementById('publicTagFilter').value;
+      let query = supabaseClient.from('threads').select('*').order('created_at', { ascending: false });
+      if (tagFilter !== 'all') query = query.eq('tag', tagFilter);
+      const { data: threads, error } = await query;
+      if (error) { container.innerHTML = `<div class="thread-card" style="border-color:#f43f5e;"><p>❌ Error: ${error.message}</p></div>`; return; }
       document.getElementById('stat-threads').textContent = threads ? threads.length : 0;
       let totalReplies = 0;
       if (threads && threads.length > 0) {
@@ -865,23 +1507,19 @@
         if (count !== null) totalReplies = count;
       }
       document.getElementById('stat-replies').textContent = totalReplies;
-
       if (!threads || threads.length === 0) {
-        container.innerHTML = `<div class="thread-card"><p class="text-muted">No threads yet. Start one above!</p></div>`;
+        container.innerHTML = `<div class="thread-card"><p class="text-muted">No threads with this tag. Start one above!</p></div>`;
         return;
       }
 
       const userName = getUserName();
-      const sessionId = getSessionId();
-      const isAdmin = currentUserIsAdminOrMod();
-
+      const admin = isAdmin();
       let html = '';
       for (const t of threads) {
         const { count: likeCount } = await supabaseClient.from('likes').select('*', { count: 'exact', head: true }).eq('thread_id', t.id);
         const { count: userLikeCount } = await supabaseClient.from('likes').select('*', { count: 'exact', head: true }).eq('thread_id', t.id).eq('user_name', userName);
         const userLike = userLikeCount > 0;
         const { count: replyCount } = await supabaseClient.from('posts').select('*', { count: 'exact', head: true }).eq('thread_id', t.id);
-
         const safeTitle = sanitizeInput(t.title);
         const safeContent = sanitizeInput(t.content || '');
         const rawAuthor = t.author_name || '';
@@ -889,179 +1527,81 @@
         const displayName = userInfo.displayName;
         const roleClass = userInfo.role === 'admin' ? 'admin-post' : userInfo.role === 'mod' ? 'mod-post' : userInfo.role === 'unverified' ? 'unverified-post' : '';
         const badgeHtml = userInfo.badge;
-
-        const isMyPost = t.session_id === sessionId;
-        const canDelete = isMyPost || isAdmin;
-        const myPostClass = isMyPost ? 'my-post' : '';
-
         let mediaHtml = '';
         const mediaType = t.media_type || 'image';
         const mediaUrl = t.image_url;
         if (mediaUrl) {
           if (mediaType === 'video') {
-            mediaHtml = `
-              <div class="media-wrapper">
-                <video controls src="${mediaUrl}" style="max-height:400px; width:100%; border-radius:12px; background:#000;"></video>
-              </div>
-            `;
+            mediaHtml = `<div class="media-wrapper"><video controls src="${mediaUrl}" style="max-height:400px; width:100%; border-radius:12px; background:#000;"></video></div>`;
           } else if (mediaType === 'file') {
             const fileName = mediaUrl.split('/').pop();
-            mediaHtml = `
-              <div class="media-wrapper">
-                <a href="${mediaUrl}" target="_blank" download class="file-download"><i class="fas fa-download"></i> ${fileName}</a>
-              </div>
-            `;
+            mediaHtml = `<div class="media-wrapper"><a href="${mediaUrl}" target="_blank" download class="file-download"><i class="fas fa-download"></i> ${fileName}</a></div>`;
           } else {
-            // image
             const blurredClass = t.blurred ? 'image-blur' : '';
             const unblurred = localStorage.getItem(`unblurred_${t.id}`) === 'true' ? 'unblurred' : '';
             const imgClass = `thread-image ${blurredClass} ${unblurred}`.trim();
             mediaHtml = `<img src="${mediaUrl}" class="${imgClass}" alt="thread image" onclick="toggleBlur('${t.id}', this)" />`;
           }
         }
-
-        let lockHtml = '';
-        let passwordVerified = false;
+        let lockHtml = '', passwordVerified = false;
         if (t.password_hash) {
           const unlocked = localStorage.getItem(`unlocked_${t.id}`) === 'true';
           if (!unlocked) {
-            lockHtml = `
-              <div class="lock-overlay">
-                <p><i class="fas fa-lock"></i> This post is password protected.</p>
-                <input type="password" id="pwd-input-${t.id}" placeholder="Enter password" />
-                <button onclick="unlockThread('${t.id}')">Unlock</button>
-                <span id="pwd-error-${t.id}" style="color:#f43f5e; display:block;"></span>
-              </div>
-            `;
+            lockHtml = `<div class="lock-overlay"><p><i class="fas fa-lock"></i> This post is password protected.</p><input type="password" id="pwd-input-${t.id}" placeholder="Enter password" /><button onclick="unlockThread('${t.id}')">Unlock</button><span id="pwd-error-${t.id}" style="color:#f43f5e; display:block;"></span></div>`;
           } else { passwordVerified = true; }
         }
-
-        let ageHtml = '';
-        let ageVerified = false;
+        let ageHtml = '', ageVerified = false;
         if (t.age_required && t.age_required > 0) {
           const ageOk = localStorage.getItem(`age_verified_${t.id}`) === 'true';
           if (!ageOk) {
-            ageHtml = `
-              <div class="age-overlay">
-                <p><i class="fas fa-shield-alt"></i> This post requires age ${t.age_required}+.</p>
-                <input type="number" id="age-input-${t.id}" placeholder="Enter your age" />
-                <button onclick="verifyAge('${t.id}', ${t.age_required})">Verify</button>
-                <span id="age-error-${t.id}" style="color:#f43f5e; display:block;"></span>
-              </div>
-            `;
+            ageHtml = `<div class="age-overlay"><p><i class="fas fa-shield-alt"></i> This post requires age ${t.age_required}+.</p><input type="number" id="age-input-${t.id}" placeholder="Enter your age" /><button onclick="verifyAge('${t.id}', ${t.age_required})">Verify</button><span id="age-error-${t.id}" style="color:#f43f5e; display:block;"></span></div>`;
           } else { ageVerified = true; }
         }
-
         const showContent = (!t.password_hash || passwordVerified) && (!t.age_required || t.age_required === 0 || ageVerified);
-
         const lockIcon = t.password_hash ? `<i class="fas fa-lock lock-icon" title="Password protected"></i>` : '';
         const ageIcon = t.age_required && t.age_required > 0 ? `<i class="fas fa-shield-alt age-icon" title="Age ${t.age_required}+"></i>` : '';
+        const tagBadge = t.tag ? `<span class="tag-badge">${sanitizeInput(t.tag)}</span>` : '';
 
-        const deleteBtn = `
-          <div class="delete-wrap">
-            <button class="delete-btn" ${canDelete ? `onclick="requestDeleteThread('${t.id}')"` : 'disabled'} title="${canDelete ? 'Delete' : 'Only the author or admin can delete'}">
-              <i class="fas fa-trash"></i> Delete
-            </button>
-          </div>
-        `;
+        const canEdit = admin;
+        const editBtns = canEdit ? `
+          <span class="edit-btn" onclick="editThread('${t.id}')" data-editing="false"><i class="fas fa-pen"></i></span>
+          <span class="delete-btn" onclick="deleteThread('${t.id}')"><i class="fas fa-trash"></i></span>
+          <span class="admin-label">Admin</span>
+        ` : '';
 
-        html += `
-          <div class="thread-card ${roleClass} ${myPostClass}" data-thread-id="${t.id}">
-            <div class="author">
-              <img src="${getAvatar(displayName === 'Unverified' ? '' : displayName)}" alt="" />
-              <span class="name">${sanitizeInput(displayName)} ${badgeHtml}</span>
-              ${isMyPost ? `<span style="font-size:0.6rem; color:#38bdf8; background:#1e2648; padding:0.1rem 0.5rem; border-radius:10px;">You</span>` : ''}
-              <span class="time">${new Date(t.created_at).toLocaleString()}</span>
-              ${lockIcon} ${ageIcon}
-              ${deleteBtn}
-            </div>
-            <h2>${safeTitle}</h2>
-            ${showContent ? `<div class="content">${safeContent}</div>${mediaHtml}` : `
-              <div class="content" style="opacity:0.3; filter: blur(4px); pointer-events:none;">${safeContent.substring(0, 100)}...</div>
-              ${mediaUrl ? `<div style="filter: blur(20px);">${mediaHtml}</div>` : ''}
-            `}
-            ${!showContent ? lockHtml + ageHtml : ''}
-            <div class="actions">
-              <span class="like-toggle ${userLike ? 'liked' : ''}" data-thread="${t.id}" onclick="toggleLike('${t.id}')">
-                <i class="fas fa-heart"></i> <span class="like-count">${likeCount || 0}</span>
-              </span>
-              <span><i class="fas fa-comment"></i> ${replyCount || 0}</span>
-              <span><i class="fas fa-share"></i> Share</span>
-            </div>
-            <div id="replies-${t.id}" class="replies-container hidden"></div>
-            <button class="show-replies-btn" onclick="viewThread('${t.id}')">
-              <i class="fas fa-chevron-down"></i> Show replies
-            </button>
+        html += `<div class="thread-card ${roleClass}" data-thread-id="${t.id}">
+          <div class="author">
+            <img src="${getAvatar(displayName === 'Unverified' ? '' : displayName)}" alt="" />
+            <span class="name">${sanitizeInput(displayName)} ${badgeHtml}</span>
+            ${tagBadge}
+            <span class="time">${new Date(t.created_at).toLocaleString()}</span>
+            ${lockIcon} ${ageIcon}
           </div>
-        `;
+          <h2>${safeTitle}</h2>
+          ${showContent ? `<div class="content">${safeContent}</div>${mediaHtml}` : `<div class="content" style="opacity:0.3; filter: blur(4px); pointer-events:none;">${safeContent.substring(0, 100)}...</div>${mediaUrl ? `<div style="filter: blur(20px);">${mediaHtml}</div>` : ''}`}
+          ${!showContent ? lockHtml + ageHtml : ''}
+          <div class="actions">
+            <span class="like-toggle ${userLike ? 'liked' : ''}" data-thread="${t.id}" onclick="toggleLike('${t.id}')">
+              <i class="fas fa-heart"></i> <span class="like-count">${likeCount || 0}</span>
+            </span>
+            <span><i class="fas fa-comment"></i> ${replyCount || 0}</span>
+            <span><i class="fas fa-share-alt"></i> Share</span>
+            ${editBtns}
+          </div>
+          <div id="replies-${t.id}" class="replies-container hidden"></div>
+          <button class="show-replies-btn" onclick="viewThread('${t.id}')">
+            <i class="fas fa-chevron-down"></i> Show replies
+          </button>
+        </div>`;
       }
       container.innerHTML = html;
+      if (admin) updateAdminStats();
     }
 
-    // ============================================================
-    // BLUR, UNLOCK, AGE
-    // ============================================================
-    window.toggleBlur = function(threadId, imgElement) {
-      const current = imgElement.classList.contains('unblurred');
-      if (current) {
-        imgElement.classList.remove('unblurred');
-        localStorage.setItem(`unblurred_${threadId}`, 'false');
-      } else {
-        imgElement.classList.add('unblurred');
-        localStorage.setItem(`unblurred_${threadId}`, 'true');
-      }
-    };
-
-    window.unlockThread = async function(threadId) {
-      const input = document.getElementById(`pwd-input-${threadId}`);
-      const errorSpan = document.getElementById(`pwd-error-${threadId}`);
-      const entered = input.value;
-      if (!entered) { errorSpan.textContent = 'Enter a password.'; return; }
-      const { data, error } = await supabaseClient.from('threads').select('password_hash').eq('id', threadId).single();
-      if (error) { errorSpan.textContent = 'Error fetching password.'; return; }
-      const enteredHash = await sha256(entered);
-      if (enteredHash === data.password_hash) {
-        localStorage.setItem(`unlocked_${threadId}`, 'true');
-        loadThreads();
-      } else {
-        errorSpan.textContent = 'Incorrect password.';
-      }
-    };
-
-    window.verifyAge = function(threadId, requiredAge) {
-      const input = document.getElementById(`age-input-${threadId}`);
-      const errorSpan = document.getElementById(`age-error-${threadId}`);
-      const age = parseInt(input.value);
-      if (isNaN(age) || age < requiredAge) {
-        errorSpan.textContent = `You must be at least ${requiredAge} years old.`;
-        return;
-      }
-      localStorage.setItem(`age_verified_${threadId}`, 'true');
-      loadThreads();
-    };
+    document.getElementById('publicTagFilter').addEventListener('change', loadThreads);
 
     // ============================================================
-    // LIKE
-    // ============================================================
-    window.toggleLike = async function(threadId) {
-      const userName = getUserName();
-      const likeToggle = document.querySelector(`.like-toggle[data-thread="${threadId}"]`);
-      if (!likeToggle) return;
-      const { data: existing } = await supabaseClient.from('likes').select('*').eq('thread_id', parseInt(threadId)).eq('user_name', userName);
-      if (existing && existing.length > 0) {
-        const { error } = await supabaseClient.from('likes').delete().eq('thread_id', parseInt(threadId)).eq('user_name', userName);
-        if (error) { alert('Error: ' + error.message); return; }
-      } else {
-        const { error } = await supabaseClient.from('likes').insert([{ thread_id: parseInt(threadId), user_name: userName }]);
-        if (error) { alert('Error: ' + error.message); return; }
-        triggerHaptics();
-        playPopSound();
-      }
-      loadThreads();
-    };
-
-    // ============================================================
-    // VIEW REPLIES
+    // VIEW PUBLIC THREAD (replies)
     // ============================================================
     window.viewThread = async function(threadId) {
       const container = document.getElementById(`replies-${threadId}`);
@@ -1069,18 +1609,11 @@
       if (container.classList.contains('hidden')) {
         container.classList.remove('hidden');
         const { data: posts, error } = await supabaseClient.from('posts').select('*').eq('thread_id', threadId).order('created_at', { ascending: true });
-        if (error) {
-          container.innerHTML = `<p style="color:#f43f5e;">❌ Error: ${error.message}</p>`;
-          return;
-        }
-
-        const sessionId = getSessionId();
-        const isAdmin = currentUserIsAdminOrMod();
-
+        if (error) { container.innerHTML = `<p style="color:#f43f5e;">❌ Error: ${error.message}</p>`; return; }
+        const admin = isAdmin();
         let html = '';
-        if (!posts || posts.length === 0) {
-          html = '<p class="text-muted">No replies yet. Be the first!</p>';
-        } else {
+        if (!posts || posts.length === 0) { html = '<p class="text-muted">No replies yet. Be the first!</p>'; }
+        else {
           html = posts.map(p => {
             const rawAuthor = p.author_name || '';
             const userInfo = getUserDisplay(rawAuthor);
@@ -1088,18 +1621,6 @@
             const roleClass = userInfo.role === 'admin' ? 'admin-post' : userInfo.role === 'mod' ? 'mod-post' : userInfo.role === 'unverified' ? 'unverified-post' : '';
             const badgeHtml = userInfo.badge;
             const safeContent = sanitizeInput(p.content);
-            const isMyPost = p.session_id === sessionId;
-            const canDelete = isMyPost || isAdmin;
-            const myPostClass = isMyPost ? 'my-post' : '';
-
-            const deleteBtn = `
-              <div class="delete-wrap">
-                <button class="delete-btn" ${canDelete ? `onclick="requestDeleteReply('${threadId}', '${p.id}')"` : 'disabled'} title="${canDelete ? 'Delete' : 'Only the author or admin can delete'}">
-                  <i class="fas fa-trash"></i>
-                </button>
-              </div>
-            `;
-
             let mediaHtml = '';
             const mediaType = p.media_type || 'image';
             const mediaUrl = p.image_url;
@@ -1113,91 +1634,76 @@
                 mediaHtml = `<img src="${mediaUrl}" class="reply-image" alt="reply image" />`;
               }
             }
-
-            return `
-              <div class="reply-item ${roleClass} ${myPostClass}">
-                <div class="author">
-                  <img src="${getAvatar(displayName === 'Unverified' ? '' : displayName)}" alt="" />
-                  <span class="name">${sanitizeInput(displayName)} ${badgeHtml}</span>
-                  ${isMyPost ? `<span style="font-size:0.55rem; color:#38bdf8; background:#1e2648; padding:0.05rem 0.4rem; border-radius:8px;">You</span>` : ''}
-                  <span class="time">${new Date(p.created_at).toLocaleString()}</span>
-                  ${deleteBtn}
-                </div>
-                <div class="content">${safeContent}</div>
-                ${mediaHtml}
+            const canEdit = admin;
+            const editBtns = canEdit ? `
+              <span class="edit-btn" onclick="editPost('${threadId}','${p.id}')" data-editing="false"><i class="fas fa-pen"></i></span>
+              <span class="delete-btn" onclick="deletePost('${threadId}','${p.id}')"><i class="fas fa-trash"></i></span>
+              <span class="admin-label">Admin</span>
+            ` : '';
+            return `<div class="reply-item ${roleClass}" data-post-id="${p.id}">
+              <div class="author">
+                <img src="${getAvatar(displayName === 'Unverified' ? '' : displayName)}" alt="" />
+                <span class="name">${sanitizeInput(displayName)} ${badgeHtml}</span>
+                <span class="time">${new Date(p.created_at).toLocaleString()}</span>
               </div>
-            `;
+              <div class="content">${safeContent}</div>
+              ${mediaHtml}
+              <div class="actions">${editBtns}</div>
+            </div>`;
           }).join('');
         }
-
-        // Reply form with conditional media upload
-        const isAuthorAdmin = isAdminOrMod(document.getElementById('author-name').value);
-        const mediaWrapperStyle = isAuthorAdmin ? 'display:flex;' : 'display:none;';
-        html += `
-          <div class="reply-form">
-            <input type="text" id="reply-author-${threadId}" placeholder="Your name" />
-            <textarea id="reply-content-${threadId}" placeholder="Write a reply..." rows="2"></textarea>
-            <div class="file-input-wrapper" style="flex-basis:100%;">
-              <input type="file" id="reply-image-${threadId}" accept="image/*" />
-              <label for="reply-image-${threadId}" style="font-size:0.75rem;"><i class="fas fa-image"></i> Add image</label>
-              <img id="reply-image-preview-${threadId}" class="preview" />
-            </div>
-            <div class="file-input-wrapper conditional" id="reply-media-wrapper-${threadId}" style="${mediaWrapperStyle}">
-              <input type="file" id="reply-media-${threadId}" accept="video/*,.zip,.rar,.7z,.pdf,.doc,.docx,.txt" />
-              <label for="reply-media-${threadId}" style="font-size:0.75rem;"><i class="fas fa-video"></i> Add video/file (admin/mod only)</label>
-              <span id="reply-media-filename-${threadId}" style="font-size:0.75rem; color:#7a82a0; margin-left:0.3rem;"></span>
-            </div>
-            <button onclick="addReply('${threadId}')"><i class="fas fa-reply"></i> Reply</button>
-            <span id="reply-status-${threadId}" class="status-msg" style="display:none;"></span>
+        html += `<div class="reply-form">
+          <input type="text" id="reply-author-${threadId}" placeholder="Your name" />
+          <textarea id="reply-content-${threadId}" placeholder="Write a reply..." rows="2"></textarea>
+          <div class="file-input-wrapper">
+            <input type="file" id="reply-image-${threadId}" accept="image/*" />
+            <label for="reply-image-${threadId}" style="font-size:0.75rem;"><i class="fas fa-image"></i> Add image</label>
+            <img id="reply-image-preview-${threadId}" class="preview" />
+            <span class="filename" id="reply-image-filename-${threadId}"></span>
           </div>
-        `;
+          <div class="file-input-wrapper">
+            <input type="file" id="reply-media-${threadId}" accept="video/*,.zip,.rar,.7z,.pdf,.doc,.docx,.txt" />
+            <label for="reply-media-${threadId}" style="font-size:0.75rem;"><i class="fas fa-video"></i> Add video/file</label>
+            <span class="filename" id="reply-media-filename-${threadId}"></span>
+          </div>
+          <button onclick="addReply('${threadId}')"><i class="fas fa-reply"></i> Reply</button>
+          <span id="reply-status-${threadId}" class="status-msg" style="display:none;"></span>
+        </div>`;
         container.innerHTML = html;
-        // Set up reply author name listener for conditional media
-        const replyAuthorInput = document.getElementById(`reply-author-${threadId}`);
-        if (replyAuthorInput) {
-          replyAuthorInput.addEventListener('input', function() {
-            const wrapper = document.getElementById(`reply-media-wrapper-${threadId}`);
-            if (wrapper) {
-              if (isAdminOrMod(this.value)) {
-                wrapper.style.display = 'flex';
-              } else {
-                wrapper.style.display = 'none';
-              }
-            }
-          });
-        }
-        // Image preview for reply
+        // Preview handlers
         const replyImageInput = document.getElementById(`reply-image-${threadId}`);
         if (replyImageInput) {
           replyImageInput.addEventListener('change', function(e) {
             const preview = document.getElementById(`reply-image-preview-${threadId}`);
-            if (preview && this.files && this.files[0]) {
+            const filenameSpan = document.getElementById(`reply-image-filename-${threadId}`);
+            if (this.files && this.files[0]) {
               const reader = new FileReader();
-              reader.onload = function(ev) { preview.src = ev.target.result; preview.style.display = 'block'; };
+              reader.onload = function(ev) { if (preview) { preview.src = ev.target.result; preview.style.display = 'block'; } };
               reader.readAsDataURL(this.files[0]);
-            } else if (preview) { preview.style.display = 'none'; }
+              if (filenameSpan) filenameSpan.textContent = this.files[0].name;
+            } else {
+              if (preview) { preview.style.display = 'none'; preview.src = ''; }
+              if (filenameSpan) filenameSpan.textContent = '';
+            }
           });
         }
-        // Show filename for reply media
         const replyMediaInput = document.getElementById(`reply-media-${threadId}`);
         if (replyMediaInput) {
           replyMediaInput.addEventListener('change', function(e) {
             const filenameSpan = document.getElementById(`reply-media-filename-${threadId}`);
-            if (filenameSpan && this.files && this.files[0]) {
-              filenameSpan.textContent = this.files[0].name;
-            } else if (filenameSpan) {
-              filenameSpan.textContent = '';
+            if (this.files && this.files[0]) {
+              if (filenameSpan) filenameSpan.textContent = this.files[0].name;
+            } else {
+              if (filenameSpan) filenameSpan.textContent = '';
             }
           });
         }
         setTimeout(() => container.scrollTop = container.scrollHeight, 100);
-      } else {
-        container.classList.add('hidden');
-      }
+      } else { container.classList.add('hidden'); }
     };
 
     // ============================================================
-    // ADD REPLY
+    // ADD REPLY (public)
     // ============================================================
     window.addReply = async function(threadId) {
       const authorInput = document.getElementById(`reply-author-${threadId}`);
@@ -1211,7 +1717,7 @@
       const rawContent = contentInput.value.trim();
       if (!rawContent) { alert('Write something.'); return; }
 
-      const author = rawAuthor;
+      const author = rawAuthor || 'Anonymous';
       const content = sanitizeInput(rawContent);
       const sessionId = getSessionId();
 
@@ -1220,21 +1726,13 @@
 
       let imageUrl = null;
       let mediaType = 'image';
-
-      // Check if admin/mod uploaded a media file
       let fileToUpload = null;
       let fileType = '';
-      if (isAdminOrMod(author) && mediaInput && mediaInput.files && mediaInput.files[0]) {
+      if (mediaInput && mediaInput.files && mediaInput.files[0]) {
         fileToUpload = mediaInput.files[0];
-        // Determine media type from MIME type
         const mime = fileToUpload.type;
-        if (mime.startsWith('video/')) {
-          fileType = 'video';
-        } else {
-          fileType = 'file';
-        }
+        if (mime.startsWith('video/')) { fileType = 'video'; } else { fileType = 'file'; }
       } else if (imageInput && imageInput.files && imageInput.files[0]) {
-        // Fallback to image if no media and image present
         fileToUpload = imageInput.files[0];
         fileType = 'image';
       }
@@ -1242,11 +1740,7 @@
       if (fileToUpload) {
         const folder = fileType === 'image' ? 'images' : 'media';
         imageUrl = await uploadFile(fileToUpload, folder);
-        if (!imageUrl) {
-          setStatus(statusEl, 'File upload failed', 'error');
-          btn.disabled = false;
-          return;
-        }
+        if (!imageUrl) { setStatus(statusEl, 'File upload failed', 'error'); btn.disabled = false; return; }
         mediaType = fileType;
       }
 
@@ -1259,11 +1753,7 @@
         media_type: mediaType
       }]);
 
-      if (error) {
-        setStatus(statusEl, 'Failed: ' + error.message, 'error');
-        btn.disabled = false;
-        return;
-      }
+      if (error) { setStatus(statusEl, 'Failed: ' + error.message, 'error'); btn.disabled = false; return; }
 
       setStatus(statusEl, 'Sent! ✅', 'sent');
       authorInput.value = '';
@@ -1272,8 +1762,10 @@
       if (mediaInput) mediaInput.value = '';
       const imagePreview = document.getElementById(`reply-image-preview-${threadId}`);
       if (imagePreview) { imagePreview.style.display = 'none'; imagePreview.src = ''; }
-      const filenameSpan = document.getElementById(`reply-media-filename-${threadId}`);
-      if (filenameSpan) { filenameSpan.textContent = ''; }
+      const imageFilename = document.getElementById(`reply-image-filename-${threadId}`);
+      if (imageFilename) imageFilename.textContent = '';
+      const mediaFilename = document.getElementById(`reply-media-filename-${threadId}`);
+      if (mediaFilename) mediaFilename.textContent = '';
 
       playPopSound();
       triggerHaptics();
@@ -1284,28 +1776,30 @@
     };
 
     // ============================================================
-    // CREATE THREAD
+    // CREATE PUBLIC THREAD
     // ============================================================
     document.getElementById('create-thread-btn').addEventListener('click', async function() {
-      ensureNameSaved();
       const titleInput = document.getElementById('thread-title');
       const contentInput = document.getElementById('thread-content');
       const authorInput = document.getElementById('author-name');
-      const imageInput = document.getElementById('thread-image-input');
-      const mediaInput = document.getElementById('thread-media-input');
+      const tagSelect = document.getElementById('thread-tag');
       const blurCheck = document.getElementById('thread-blur');
       const passwordInput = document.getElementById('thread-password');
       const ageInput = document.getElementById('thread-age');
+      const imageInput = document.getElementById('thread-image-input');
+      const mediaInput = document.getElementById('thread-media-input');
       const statusEl = document.getElementById('thread-status');
 
       const rawTitle = titleInput.value.trim();
       const rawContent = contentInput.value.trim();
       const rawAuthor = authorInput.value.trim();
+      const tag = tagSelect.value;
       if (!rawTitle) { alert('Enter a title.'); return; }
+      if (!tag) { alert('Please select a tag.'); return; }
 
       const title = sanitizeInput(rawTitle);
       const content = sanitizeInput(rawContent);
-      const author = rawAuthor;
+      const author = rawAuthor || 'Anonymous';
       const blurred = blurCheck.checked;
       let password_hash = null;
       const password = passwordInput.value.trim();
@@ -1318,18 +1812,12 @@
 
       let imageUrl = null;
       let mediaType = 'image';
-
-      // Check for media upload if admin/mod
       let fileToUpload = null;
       let fileType = '';
-      if (isAdminOrMod(author) && mediaInput && mediaInput.files && mediaInput.files[0]) {
+      if (mediaInput && mediaInput.files && mediaInput.files[0]) {
         fileToUpload = mediaInput.files[0];
         const mime = fileToUpload.type;
-        if (mime.startsWith('video/')) {
-          fileType = 'video';
-        } else {
-          fileType = 'file';
-        }
+        if (mime.startsWith('video/')) { fileType = 'video'; } else { fileType = 'file'; }
       } else if (imageInput && imageInput.files && imageInput.files[0]) {
         fileToUpload = imageInput.files[0];
         fileType = 'image';
@@ -1338,11 +1826,7 @@
       if (fileToUpload) {
         const folder = fileType === 'image' ? 'images' : 'media';
         imageUrl = await uploadFile(fileToUpload, folder);
-        if (!imageUrl) {
-          setStatus(statusEl, 'File upload failed', 'error');
-          this.disabled = false;
-          return;
-        }
+        if (!imageUrl) { setStatus(statusEl, 'File upload failed', 'error'); this.disabled = false; return; }
         mediaType = fileType;
       }
 
@@ -1350,75 +1834,268 @@
         title: title,
         content: content,
         author_name: author,
-        image_url: imageUrl,
+        tag: tag,
         blurred: blurred,
         password_hash: password_hash,
         age_required: age_required,
         session_id: sessionId,
+        image_url: imageUrl,
         media_type: mediaType
       }]);
 
-      if (error) {
-        setStatus(statusEl, 'Failed: ' + error.message, 'error');
-        this.disabled = false;
-        return;
-      }
+      if (error) { setStatus(statusEl, 'Failed: ' + error.message, 'error'); this.disabled = false; return; }
 
       setStatus(statusEl, 'Sent! ✅', 'sent');
       titleInput.value = '';
       contentInput.value = '';
       authorInput.value = '';
-      imageInput.value = '';
-      if (mediaInput) mediaInput.value = '';
-      document.getElementById('thread-image-preview').style.display = 'none';
-      const mediaFilename = document.getElementById('thread-media-filename');
-      if (mediaFilename) mediaFilename.textContent = '';
+      tagSelect.value = '';
       blurCheck.checked = false;
       passwordInput.value = '';
       ageInput.value = '';
+      if (imageInput) imageInput.value = '';
+      if (mediaInput) mediaInput.value = '';
+      document.getElementById('thread-image-preview').style.display = 'none';
+      document.getElementById('thread-image-preview').src = '';
+      document.getElementById('thread-image-filename').textContent = '';
+      document.getElementById('thread-media-filename').textContent = '';
       loadThreads();
       this.disabled = false;
     });
 
-    // ============================================================
-    // IMAGE PREVIEW (thread)
-    // ============================================================
+    // File input preview handlers
     document.getElementById('thread-image-input').addEventListener('change', function(e) {
       const preview = document.getElementById('thread-image-preview');
+      const filename = document.getElementById('thread-image-filename');
       if (this.files && this.files[0]) {
         const reader = new FileReader();
         reader.onload = function(ev) { preview.src = ev.target.result; preview.style.display = 'block'; };
         reader.readAsDataURL(this.files[0]);
-      } else { preview.style.display = 'none'; }
-    });
-
-    // Thread media filename display
-    document.getElementById('thread-media-input').addEventListener('change', function(e) {
-      const span = document.getElementById('thread-media-filename');
-      if (span && this.files && this.files[0]) {
-        span.textContent = this.files[0].name;
-      } else if (span) {
-        span.textContent = '';
+        filename.textContent = this.files[0].name;
+      } else {
+        preview.style.display = 'none';
+        preview.src = '';
+        filename.textContent = '';
       }
     });
+    document.getElementById('thread-media-input').addEventListener('change', function(e) {
+      const filename = document.getElementById('thread-media-filename');
+      if (this.files && this.files[0]) { filename.textContent = this.files[0].name; } else { filename.textContent = ''; }
+    });
 
     // ============================================================
-    // AUTH
+    // LOAD MEMBER THREADS
     // ============================================================
-    async function checkAuth() {
-      const { data: { session } } = await supabaseClient.auth.getSession();
-      const status = document.getElementById('auth-status');
-      if (session) status.innerHTML = `<i class="fas fa-check-circle" style="color:#2dd4bf;"></i> ${session.user.email}`;
-      else status.innerHTML = `<i class="fas fa-user-secret"></i> Anonymous`;
+    async function loadMemberThreads() {
+      if (!currentUser) return;
+      const container = document.getElementById('memberThreadsContainer');
+      container.innerHTML = `<p style="color:#7a82a0; text-align:center; padding:1rem;">Loading member threads...</p>`;
+      const tagFilter = document.getElementById('memberTagFilter').value;
+      try {
+        let query = supabaseClient.from('member_threads').select('*').order('created_at', { ascending: false });
+        if (tagFilter !== 'all') query = query.eq('tag', tagFilter);
+        const { data: threads, error } = await query;
+        if (error) throw error;
+        if (!threads || threads.length === 0) {
+          container.innerHTML = `<p style="color:#7a82a0; text-align:center; padding:1rem;">No member threads with this tag. Start one above!</p>`;
+          return;
+        }
+        const admin = isAdmin();
+        let html = '';
+        for (const t of threads) {
+          const { count: replyCount } = await supabaseClient.from('member_posts').select('*', { count: 'exact', head: true }).eq('thread_id', t.id);
+          const userInfo = getUserDisplay(t.author_name || 'Anonymous');
+          const displayName = userInfo.displayName;
+          const badgeHtml = userInfo.badge;
+          const tagBadge = t.tag ? `<span class="tag-badge">${sanitizeInput(t.tag)}</span>` : '';
+          const canEdit = admin || isOwner(t.author_id);
+          const editBtns = canEdit ? `
+            <span class="edit-btn" onclick="editMemberThread('${t.id}')" data-editing="false"><i class="fas fa-pen"></i></span>
+            <span class="delete-btn" onclick="deleteMemberThread('${t.id}')"><i class="fas fa-trash"></i></span>
+            ${admin ? '<span class="admin-label">Admin</span>' : ''}
+          ` : '';
+          html += `<div class="member-thread" data-thread-id="${t.id}">
+            <div class="author">
+              <img src="${getAvatar(displayName)}" alt="" />
+              <span class="name">${sanitizeInput(displayName)} ${badgeHtml}</span>
+              ${tagBadge}
+              <span class="time">${new Date(t.created_at).toLocaleString()}</span>
+            </div>
+            <h3>${sanitizeInput(t.title)}</h3>
+            <div class="content">${sanitizeInput(t.content || '')}</div>
+            <div class="actions">
+              <span><i class="fas fa-comment"></i> ${replyCount || 0}</span>
+              ${editBtns}
+            </div>
+            <div id="member-replies-${t.id}" class="member-replies"></div>
+            <button class="show-replies-btn" onclick="viewMemberThread('${t.id}')">
+              <i class="fas fa-chevron-down"></i> Show replies
+            </button>
+          </div>`;
+        }
+        container.innerHTML = html;
+      } catch (e) { container.innerHTML = `<p style="color:#f43f5e;">❌ Error: ${e.message}</p>`; }
     }
+
+    document.getElementById('memberTagFilter').addEventListener('change', loadMemberThreads);
+
+    // ============================================================
+    // VIEW MEMBER THREAD (replies)
+    // ============================================================
+    window.viewMemberThread = async function(threadId) {
+      const container = document.getElementById(`member-replies-${threadId}`);
+      if (!container) return;
+      if (container.classList.contains('hidden')) {
+        container.classList.remove('hidden');
+        const { data: posts, error } = await supabaseClient.from('member_posts').select('*').eq('thread_id', threadId).order('created_at', { ascending: true });
+        if (error) { container.innerHTML = `<p style="color:#f43f5e;">❌ Error: ${error.message}</p>`; return; }
+        const admin = isAdmin();
+        let html = '';
+        if (!posts || posts.length === 0) { html = '<p style="color:#7a82a0; font-size:0.85rem;">No replies yet.</p>'; }
+        else {
+          html = posts.map(p => {
+            const userInfo = getUserDisplay(p.author_name || 'Anonymous');
+            const displayName = userInfo.displayName;
+            const canEdit = admin || isOwner(p.author_id);
+            const editBtns = canEdit ? `
+              <span class="edit-btn" onclick="editMemberPost('${threadId}','${p.id}')" data-editing="false"><i class="fas fa-pen"></i></span>
+              <span class="delete-btn" onclick="deleteMemberPost('${threadId}','${p.id}')"><i class="fas fa-trash"></i></span>
+              ${admin ? '<span class="admin-label">Admin</span>' : ''}
+            ` : '';
+            return `<div class="member-reply" data-post-id="${p.id}">
+              <div class="author">
+                <img src="${getAvatar(displayName)}" alt="" />
+                <span class="name">${sanitizeInput(displayName)}</span>
+                <span class="time">${new Date(p.created_at).toLocaleString()}</span>
+              </div>
+              <div class="content">${sanitizeInput(p.content)}</div>
+              <div class="actions">${editBtns}</div>
+            </div>`;
+          }).join('');
+        }
+        html += `<div class="member-reply-form">
+          <textarea id="member-reply-${threadId}" placeholder="Write a reply..." rows="1"></textarea>
+          <button onclick="addMemberReply('${threadId}')"><i class="fas fa-reply"></i> Reply</button>
+        </div>`;
+        container.innerHTML = html;
+        container.classList.remove('hidden');
+      } else { container.classList.add('hidden'); }
+    };
+
+    window.addMemberReply = async function(threadId) {
+      if (!currentUser) { alert('Please sign in to reply.'); return; }
+      const contentInput = document.getElementById(`member-reply-${threadId}`);
+      const content = contentInput.value.trim();
+      if (!content) { alert('Write something.'); return; }
+      const { error } = await supabaseClient.from('member_posts').insert([{ thread_id: parseInt(threadId), author_id: currentUser.id, author_name: currentUser.email, content: content }]);
+      if (error) { alert('❌ Error: ' + error.message); return; }
+      contentInput.value = ''; playPopSound();
+      await viewMemberThread(threadId);
+      loadMemberThreads();
+    };
+
+    document.getElementById('member-create-btn').addEventListener('click', async function() {
+      if (!currentUser) { alert('Please sign in to post.'); return; }
+      const titleInput = document.getElementById('member-thread-title');
+      const contentInput = document.getElementById('member-thread-content');
+      const tagSelect = document.getElementById('member-thread-tag');
+      const statusEl = document.getElementById('member-thread-status');
+      const title = titleInput.value.trim();
+      const content = contentInput.value.trim();
+      const tag = tagSelect.value;
+      if (!title) { alert('Enter a title.'); return; }
+      if (!tag) { alert('Please select a tag.'); return; }
+      this.disabled = true;
+      setStatus(statusEl, 'Sending...', 'sending');
+      const { error } = await supabaseClient.from('member_threads').insert([{ title: title, content: content, author_id: currentUser.id, author_name: currentUser.email, tag: tag }]);
+      if (error) { setStatus(statusEl, 'Failed: ' + error.message, 'error'); this.disabled = false; return; }
+      setStatus(statusEl, 'Sent! ✅', 'sent');
+      titleInput.value = ''; contentInput.value = ''; tagSelect.value = '';
+      loadMemberThreads();
+      this.disabled = false;
+    });
+
+    // Member file input previews
+    document.getElementById('member-image-input').addEventListener('change', function(e) {
+      const preview = document.getElementById('member-image-preview');
+      const filename = document.getElementById('member-image-filename');
+      if (this.files && this.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(ev) { preview.src = ev.target.result; preview.style.display = 'block'; };
+        reader.readAsDataURL(this.files[0]);
+        filename.textContent = this.files[0].name;
+      } else {
+        preview.style.display = 'none';
+        preview.src = '';
+        filename.textContent = '';
+      }
+    });
+    document.getElementById('member-media-input').addEventListener('change', function(e) {
+      const filename = document.getElementById('member-media-filename');
+      if (this.files && this.files[0]) { filename.textContent = this.files[0].name; } else { filename.textContent = ''; }
+    });
+
+    // ============================================================
+    // LIKES, BLUR, UNLOCK, AGE
+    // ============================================================
+    window.toggleLike = async function(threadId) {
+      const userName = getUserName();
+      const likeToggle = document.querySelector(`.like-toggle[data-thread="${threadId}"]`);
+      if (!likeToggle) return;
+      const { data: existing } = await supabaseClient.from('likes').select('*').eq('thread_id', parseInt(threadId)).eq('user_name', userName);
+      if (existing && existing.length > 0) {
+        const { error } = await supabaseClient.from('likes').delete().eq('thread_id', parseInt(threadId)).eq('user_name', userName);
+        if (error) { alert('Error: ' + error.message); return; }
+      } else {
+        const { error } = await supabaseClient.from('likes').insert([{ thread_id: parseInt(threadId), user_name: userName }]);
+        if (error) { alert('Error: ' + error.message); return; }
+        triggerHaptics(); playPopSound();
+      }
+      loadThreads();
+    };
+
+    window.toggleBlur = function(threadId, imgElement) {
+      const current = imgElement.classList.contains('unblurred');
+      if (current) { imgElement.classList.remove('unblurred'); localStorage.setItem(`unblurred_${threadId}`, 'false'); }
+      else { imgElement.classList.add('unblurred'); localStorage.setItem(`unblurred_${threadId}`, 'true'); }
+    };
+
+    window.unlockThread = async function(threadId) {
+      const input = document.getElementById(`pwd-input-${threadId}`);
+      const errorSpan = document.getElementById(`pwd-error-${threadId}`);
+      const entered = input.value;
+      if (!entered) { errorSpan.textContent = 'Enter a password.'; return; }
+      const { data, error } = await supabaseClient.from('threads').select('password_hash').eq('id', threadId).single();
+      if (error) { errorSpan.textContent = 'Error fetching password.'; return; }
+      const enteredHash = await sha256(entered);
+      if (enteredHash === data.password_hash) { localStorage.setItem(`unlocked_${threadId}`, 'true'); loadThreads(); }
+      else { errorSpan.textContent = 'Incorrect password.'; }
+    };
+
+    window.verifyAge = function(threadId, requiredAge) {
+      const input = document.getElementById(`age-input-${threadId}`);
+      const errorSpan = document.getElementById(`age-error-${threadId}`);
+      const age = parseInt(input.value);
+      if (isNaN(age) || age < requiredAge) { errorSpan.textContent = `You must be at least ${requiredAge} years old.`; return; }
+      localStorage.setItem(`age_verified_${threadId}`, 'true');
+      loadThreads();
+    };
 
     // ============================================================
     // INIT
     // ============================================================
+    async function checkAuthAndInit() {
+      await checkAuth();
+      supabaseClient.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN' && session) { currentUser = session.user; currentSession = session; updateUIForLoggedIn(); updateAdminUI(); loadThreads(); if(currentUser) loadMemberThreads(); }
+        else if (event === 'SIGNED_OUT') { currentUser = null; currentSession = null; updateUIForLoggedOut(); updateAdminUI(); loadThreads(); }
+      });
+    }
+
     async function init() {
       try {
         await loadThreads();
-        await checkAuth();
+        await checkAuthAndInit();
         await updateStats();
         startHeartbeat();
       } catch (e) {
