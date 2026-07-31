@@ -3,2244 +3,1844 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>World Forum</title>
+  <title>⚡ PK‑Jump · Pokémon × Anime Crossover</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <style>
-    /* ─── ALL YOUR ORIGINAL CSS (unchanged) ─── */
+    /* ─── RESET ─── */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: #0b0d17;
-      color: #e4e6eb;
-      padding: 1rem;
+      font-family: 'Inter', sans-serif;
+      background: #0a0c16;
+      color: #e8edf5;
       min-height: 100vh;
-      overflow: auto; /* ← changed from hidden to auto */
+      background-image: radial-gradient(circle at 20% 30%, #1a1f3a 0%, #0a0c16 80%);
     }
-    .container { max-width: 720px; margin: 0 auto; }
+    a { color: #00e5ff; text-decoration: none; }
+    a:hover { color: #66f0ff; }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #141929; }
+    ::-webkit-scrollbar-thumb { background: #00e5ff; border-radius: 4px; }
 
-    .intro-overlay {
-      position: fixed;
-      inset: 0;
-      background: #0b0d17;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      animation: fadeOutContainer 0.6s ease-in-out forwards 2.8s;
-    }
-    .intro-logo {
-      font-size: 4rem;
-      font-weight: 900;
-      letter-spacing: 4px;
-      background: linear-gradient(45deg, #38bdf8, #2dd4bf);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      opacity: 0;
-      transform: scale(0.8);
-      animation: zoomIn 1.2s ease-out forwards 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .intro-logo i { -webkit-text-fill-color: #38bdf8; }
-    .intro-text {
-      font-size: 1.2rem;
-      color: #7a82a0;
-      margin-top: 16px;
-      opacity: 0;
-      transform: translateY(20px);
-      animation: slideUp 0.8s ease-out forwards 1s;
-    }
-    .intro-loader {
-      margin-top: 2rem;
-      width: 48px;
-      height: 48px;
-      border: 3px solid rgba(255,255,255,0.06);
-      border-top-color: #38bdf8;
-      border-radius: 50%;
-      animation: spin 1s linear infinite, fadeInLoader 0.6s ease-out forwards 1.6s;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes zoomIn { to { opacity: 1; transform: scale(1); } }
-    @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
-    @keyframes fadeInLoader { to { opacity: 1; } }
-    @keyframes fadeOutContainer { to { opacity: 0; visibility: hidden; pointer-events: none; } }
+    .container { max-width: 1320px; margin: 0 auto; padding: 0 24px; }
 
-    .main-content { opacity: 0; animation: fadeInContent 0.6s ease-out forwards 3.2s; }
-    @keyframes fadeInContent { to { opacity: 1; } }
-
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #13172b;
-      border-radius: 16px;
-      padding: 0.8rem 1.2rem;
-      margin-bottom: 0.8rem;
-      border: 1px solid #2a2f4b;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-    .top-bar .logo {
-      font-size: 1.4rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, #38bdf8, #2dd4bf);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .top-bar .visitor-badge {
-      background: #1e2648;
-      padding: 0.3rem 1rem;
-      border-radius: 20px;
-      color: #88b0f0;
-      font-size: 0.8rem;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      border: 1px solid #2a2f4b;
-    }
-    .top-bar .visitor-badge i { color: #38bdf8; }
-    .top-bar .auth-badge {
-      font-size: 0.8rem;
-      background: #1e2648;
-      padding: 0.3rem 0.8rem;
-      border-radius: 20px;
-      color: #88b0f0;
-    }
-    .top-bar .auth-badge.admin-badge-top {
-      background: #ff0033;
-      color: #fff;
-      font-weight: 700;
-      border: 1px solid #ff0033;
-      box-shadow: 0 0 20px rgba(255,0,51,0.3);
-    }
-    .top-bar .auth-badge.admin-badge-top i { color: #fff; }
-
-    .stats-row {
-      display: flex;
-      justify-content: space-around;
-      background: #13172b;
-      border-radius: 16px;
-      padding: 0.6rem 0.8rem;
-      margin-bottom: 1rem;
-      border: 1px solid #2a2f4b;
-      text-align: center;
-    }
-    .stats-row .stat-item { display: flex; flex-direction: column; }
-    .stats-row .num { font-weight: 700; color: #38bdf8; font-size: 1.2rem; }
-    .stats-row .label { color: #7a82a0; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.5px; }
-
-    .panel { display: none; animation: fadeUp 0.3s ease; }
-    .panel.active { display: block; }
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-    .tag-select {
-      width: 100%;
-      padding: 0.6rem 0.9rem;
-      margin-bottom: 0.6rem;
-      background: #0f1426;
-      border: 1px solid #2a2f4b;
-      border-radius: 12px;
-      color: #e4e6eb;
-      font-size: 0.95rem;
-    }
-    .tag-select:focus { outline: none; border-color: #38bdf8; }
-
-    .create-thread {
-      background: #13172b;
-      border-radius: 16px;
-      padding: 1rem 1.2rem;
-      margin-bottom: 1.2rem;
-      border: 1px solid #2a2f4b;
-    }
-    .create-thread h3 { font-weight: 500; font-size: 0.95rem; color: #a0a8c0; margin-bottom: 0.6rem; }
-    .create-thread input, .create-thread textarea {
-      width: 100%;
-      padding: 0.6rem 0.9rem;
-      margin-bottom: 0.6rem;
-      background: #0f1426;
-      border: 1px solid #2a2f4b;
-      border-radius: 12px;
-      color: #e4e6eb;
-      font-size: 0.95rem;
-    }
-    .create-thread input:focus, .create-thread textarea:focus { outline: none; border-color: #38bdf8; }
-    .create-thread textarea { min-height: 70px; resize: vertical; }
-    .create-thread .row { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; }
-    .create-thread .row input { flex: 2; min-width: 120px; }
-
-    .file-input-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 0.6rem;
-      flex-wrap: wrap;
-    }
-    .file-input-wrapper input[type="file"] { display: none; }
-    .file-input-wrapper label {
-      background: #1e2648;
-      padding: 0.3rem 1rem;
-      border-radius: 30px;
-      color: #88b0f0;
-      cursor: pointer;
-      font-size: 0.85rem;
-      transition: 0.2s;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-    .file-input-wrapper label:hover { background: #2a3360; }
-    .file-input-wrapper .preview { max-width: 60px; max-height: 60px; border-radius: 8px; border: 1px solid #2a2f4b; display: none; }
-    .file-input-wrapper .filename { font-size: 0.8rem; color: #7a82a0; margin-left: 0.3rem; }
-
-    .btn-primary {
-      background: linear-gradient(135deg, #0ea5e9, #06b6d4);
-      border: none;
-      padding: 0.5rem 1.4rem;
-      border-radius: 40px;
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.2s;
-      font-size: 0.95rem;
-      white-space: nowrap;
-    }
-    .btn-primary:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(14,165,233,0.3); }
-    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .status-msg {
-      font-size: 0.85rem;
-      padding: 0.3rem 0.8rem;
-      border-radius: 30px;
+    /* ─── BUTTONS ─── */
+    .btn {
       display: inline-block;
-      margin-left: 0.5rem;
+      padding: 10px 28px;
+      border: none;
+      border-radius: 40px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: inherit;
+      text-align: center;
+      letter-spacing: 0.5px;
     }
-    .status-msg.sending { color: #fbbf24; }
-    .status-msg.sent { color: #2dd4bf; }
-    .status-msg.error { color: #f43f5e; }
+    .btn-primary {
+      background: linear-gradient(135deg, #00e5ff, #0077ff);
+      color: #0a0c16;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0, 229, 255, 0.4);
+    }
+    .btn-outline {
+      background: transparent;
+      color: #00e5ff;
+      border: 2px solid #00e5ff;
+    }
+    .btn-outline:hover {
+      background: #00e5ff;
+      color: #0a0c16;
+    }
+    .btn-gold {
+      background: #ffd700;
+      color: #0a0c16;
+    }
+    .btn-gold:hover {
+      background: #ffe44d;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(255, 215, 0, 0.3);
+    }
+    .btn-sm { padding: 6px 18px; font-size: 0.8rem; }
+    .btn-danger {
+      background: #ff0044;
+      color: #fff;
+    }
+    .btn-danger:hover {
+      background: #e6003a;
+      transform: translateY(-2px);
+    }
 
-    .filter-row {
+    /* ─── BADGES ─── */
+    .badge {
+      display: inline-block;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-admin { background: #ff0044; color: #fff; }
+    .badge-subscriber { background: #ffd700; color: #0a0c16; }
+    .badge-member { background: #1a3a6a; color: #88ccff; }
+    .badge-guest { background: #2a2f42; color: #8a92a8; }
+    .badge-romhack { background: #1a4a5a; color: #66d4e0; }
+    .badge-subscriber-only { background: #7b2fbe; color: #d4a5ff; }
+
+    /* ─── HEADER ─── */
+    header {
+      background: rgba(10, 12, 22, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid #1a1f3a;
+      padding: 14px 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .navbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1rem;
       flex-wrap: wrap;
-      gap: 0.5rem;
+      gap: 12px;
     }
-    .filter-row select {
-      background: #13172b;
-      border: 1px solid #2a2f4b;
-      border-radius: 30px;
-      padding: 0.3rem 1rem;
-      color: #e4e6eb;
-      font-size: 0.85rem;
-      cursor: pointer;
-    }
-    .filter-row select:focus { outline: none; border-color: #38bdf8; }
-    .filter-row .tag-badge {
-      background: #1e2648;
-      padding: 0.2rem 0.6rem;
-      border-radius: 12px;
-      font-size: 0.7rem;
-      color: #88b0f0;
-    }
-
-    .admin-post { background: #2a0f1a !important; border: 2px solid #ff0033 !important; box-shadow: 0 0 30px rgba(255,0,51,0.2); }
-    .admin-post .author .name { color: #ff0033 !important; font-weight: 800; }
-    .admin-badge {
-      background: #ff0033; color: #fff; font-size: 0.6rem; padding: 0.15rem 0.6rem;
-      border-radius: 20px; margin-left: 0.4rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .mod-post { background: #1f2a0f !important; border: 2px solid #ff8800 !important; box-shadow: 0 0 30px rgba(255,136,0,0.2); }
-    .mod-post .author .name { color: #ff8800 !important; font-weight: 800; }
-    .mod-badge {
-      background: #ff8800; color: #fff; font-size: 0.6rem; padding: 0.15rem 0.6rem;
-      border-radius: 20px; margin-left: 0.4rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .unverified-post { background: #1a1a2a !important; border: 2px solid rgba(255,255,255,0.2) !important; box-shadow: 0 0 30px rgba(255,255,255,0.05); }
-    .unverified-post .author .name { color: #aaa !important; font-weight: 400; }
-    .unverified-badge {
-      background: rgba(255,255,255,0.1); color: #aaa; font-size: 0.6rem;
-      padding: 0.15rem 0.6rem; border-radius: 20px; margin-left: 0.4rem;
-      font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .thread-card {
-      background: #13172b;
-      border-radius: 16px;
-      padding: 1rem 1.2rem;
-      margin-bottom: 1rem;
-      border: 1px solid #2a2f4b;
-      transition: border-color 0.2s ease;
-      will-change: transform, opacity;
-    }
-    .thread-card .author { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem; flex-wrap: wrap; }
-    .thread-card .author img { width: 32px; height: 32px; border-radius: 50%; background: #1e2648; border: 2px solid #2a2f4b; }
-    .thread-card .author .name { font-weight: 600; font-size: 0.9rem; }
-    .thread-card .author .time { font-size: 0.7rem; color: #7a82a0; margin-left: auto; }
-    .thread-card .author .tag-badge { background: #1e2648; padding: 0.1rem 0.5rem; border-radius: 10px; font-size: 0.6rem; color: #88b0f0; }
-    .thread-card .author .lock-icon { color: #fbbf24; margin-left: 0.3rem; }
-    .thread-card .author .age-icon { color: #fbbf24; margin-left: 0.3rem; }
-    .thread-card h2 { font-size: 1.1rem; font-weight: 600; margin: 0.2rem 0 0.3rem; }
-    .thread-card .content { color: #c8cee0; line-height: 1.4; margin-bottom: 0.5rem; font-size: 0.95rem; word-wrap: break-word; }
-    .thread-card .thread-image { max-width: 100%; border-radius: 12px; margin: 0.5rem 0; max-height: 300px; object-fit: cover; }
-    .image-blur { filter: blur(20px); transition: filter 0.3s ease; }
-    .image-blur.unblurred { filter: none; }
-
-    .media-wrapper { margin: 0.5rem 0; border-radius: 12px; overflow: hidden; max-width: 100%; }
-    .media-wrapper video { width: 100%; max-height: 400px; border-radius: 12px; background: #000; }
-    .media-wrapper .file-download { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 1rem; background: #1e2648; border-radius: 30px; color: #88b0f0; text-decoration: none; font-size: 0.9rem; transition: 0.2s; }
-    .media-wrapper .file-download:hover { background: #2a3360; color: #fff; }
-
-    .thread-card .actions {
+    .logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 900;
+      letter-spacing: -0.5px;
       display: flex;
-      gap: 1.2rem;
-      font-size: 0.8rem;
-      color: #7a82a0;
-      border-top: 1px solid #1e2648;
-      padding-top: 0.5rem;
-      margin-top: 0.3rem;
-      flex-wrap: wrap;
       align-items: center;
+      gap: 8px;
     }
-    .thread-card .actions span { display: flex; align-items: center; gap: 0.3rem; cursor: pointer; }
-    .thread-card .actions span i { font-size: 0.9rem; }
-    .thread-card .actions .liked { color: #f43f5e; }
-    .thread-card .actions .edit-btn, .thread-card .actions .delete-btn {
-      background: none; border: none; color: #7a82a0; cursor: pointer; font-size: 0.8rem; padding: 0 0.2rem; transition: color 0.2s;
+    .logo .pika { color: #ffd700; }
+    .logo .anime { color: #00e5ff; }
+    .logo .fusion { color: #ff6bff; }
+    .logo i { font-size: 1.6rem; color: #ffd700; }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
     }
-    .thread-card .actions .edit-btn:hover { color: #38bdf8; }
-    .thread-card .actions .delete-btn:hover { color: #f43f5e; }
-    .thread-card .actions .admin-label {
-      font-size: 0.6rem;
-      color: #ff0033;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      background: rgba(255,0,51,0.15);
-      padding: 0.1rem 0.5rem;
-      border-radius: 12px;
-      border: 1px solid rgba(255,0,51,0.3);
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #141929;
+      padding: 6px 16px 6px 20px;
+      border-radius: 40px;
+      border: 1px solid #1a1f3a;
+    }
+    .user-info .avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #00e5ff;
+      color: #0a0c16;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.9rem;
+    }
+    .user-info .username { font-weight: 600; font-size: 0.9rem; }
+
+    /* ─── HERO ─── */
+    .hero {
+      padding: 80px 0 50px;
+      text-align: center;
+      border-bottom: 1px solid #1a1f3a;
+      background: linear-gradient(180deg, #0a0c16 0%, #11162a 100%);
+    }
+    .hero h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 4.2rem;
+      font-weight: 900;
+      letter-spacing: -1px;
+      line-height: 1.1;
+    }
+    .hero h1 .pika { color: #ffd700; }
+    .hero h1 .anime { color: #00e5ff; }
+    .hero h1 .fusion { color: #ff6bff; }
+    .hero p {
+      color: #b0b8cc;
+      font-size: 1.2rem;
+      max-width: 680px;
+      margin: 16px auto 32px;
+    }
+    .hero .hero-tag {
+      display: inline-block;
+      background: #1a1f3a;
+      padding: 6px 24px;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      color: #00e5ff;
+      border: 1px solid #2a3150;
+      margin-bottom: 20px;
     }
 
-    .show-replies-btn {
-      background: transparent;
-      border: none;
-      color: #38bdf8;
-      font-size: 0.8rem;
-      cursor: pointer;
-      padding: 0.2rem 0;
-      margin-top: 0.3rem;
+    /* ─── STATS BAR ─── */
+    .stats-bar {
+      background: #0f1322;
+      border-bottom: 1px solid #1a1f3a;
+      padding: 12px 0;
+    }
+    .stats-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: space-around;
+      align-items: center;
+      font-size: 0.9rem;
+      color: #b0b8cc;
+    }
+    .stats-grid span {
       display: inline-flex;
       align-items: center;
-      gap: 0.3rem;
+      gap: 6px;
     }
-    .show-replies-btn:hover { text-decoration: underline; }
-
-    .replies-container { margin-top: 0.8rem; padding-left: 1rem; border-left: 2px solid #2a2f4b; }
-    .reply-item {
-      background: #0f1426;
-      border-radius: 12px;
-      padding: 0.6rem 0.9rem;
-      margin-bottom: 0.5rem;
-      border: 1px solid #1e2648;
-      transition: border-color 0.2s ease;
-    }
-    .reply-item .author { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.1rem; flex-wrap: wrap; }
-    .reply-item .author img { width: 24px; height: 24px; border-radius: 50%; background: #1e2648; }
-    .reply-item .author .name { font-weight: 500; font-size: 0.8rem; }
-    .reply-item .author .time { font-size: 0.65rem; color: #7a82a0; margin-left: auto; }
-    .reply-item .content { font-size: 0.9rem; color: #c8cee0; margin-top: 0.1rem; word-wrap: break-word; }
-    .reply-item .reply-image { max-width: 100%; border-radius: 8px; margin-top: 0.3rem; max-height: 200px; object-fit: cover; }
-    .reply-item .reply-video { width: 100%; max-height: 300px; border-radius: 8px; background: #000; }
-    .reply-item .reply-file { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.8rem; background: #1e2648; border-radius: 20px; color: #88b0f0; text-decoration: none; font-size: 0.85rem; margin-top: 0.3rem; }
-    .reply-item .reply-file:hover { background: #2a3360; color: #fff; }
-    .reply-item .admin-post { background: #2a0f1a !important; border: 1px solid #ff0033 !important; }
-    .reply-item .mod-post { background: #1f2a0f !important; border: 1px solid #ff8800 !important; }
-    .reply-item .unverified-post { background: #1a1a2a !important; border: 1px solid rgba(255,255,255,0.2) !important; }
-    .reply-item .actions { display: flex; gap: 0.6rem; margin-top: 0.2rem; flex-wrap: wrap; align-items: center; }
-    .reply-item .actions .edit-btn, .reply-item .actions .delete-btn {
-      background: none; border: none; color: #7a82a0; cursor: pointer; font-size: 0.75rem; padding: 0 0.2rem; transition: color 0.2s;
-    }
-    .reply-item .actions .edit-btn:hover { color: #38bdf8; }
-    .reply-item .actions .delete-btn:hover { color: #f43f5e; }
-    .reply-item .actions .admin-label {
-      font-size: 0.55rem;
-      color: #ff0033;
+    .stats-grid strong {
+      color: #00e5ff;
       font-weight: 700;
-      text-transform: uppercase;
-      background: rgba(255,0,51,0.12);
-      padding: 0.05rem 0.4rem;
-      border-radius: 10px;
-      border: 1px solid rgba(255,0,51,0.2);
     }
 
-    .reply-form {
-      margin-top: 0.6rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
+    /* ─── GALLERY ─── */
+    .section-block {
+      padding: 50px 0;
+      border-top: 1px solid #1a1f3a;
     }
-    .reply-form input, .reply-form textarea {
-      flex: 1;
-      min-width: 80px;
-      padding: 0.4rem 0.7rem;
-      background: #0f1426;
-      border: 1px solid #2a2f4b;
-      border-radius: 20px;
-      color: #e4e6eb;
+    .section-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.6rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+    .section-title .highlight { color: #00e5ff; }
+    .section-subtitle {
+      color: #8a92a8;
+      font-size: 1.05rem;
+      margin-bottom: 36px;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 28px;
+      margin-top: 16px;
+    }
+    .art-card {
+      background: #141929;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid #1a1f3a;
+      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+      cursor: default;
+      position: relative;
+    }
+    .art-card:hover {
+      transform: translateY(-6px);
+      border-color: #00e5ff;
+      box-shadow: 0 12px 40px rgba(0, 229, 255, 0.08);
+    }
+    .art-card .img-wrap {
+      width: 100%;
+      padding-top: 100%;
+      position: relative;
+      overflow: hidden;
+      background: #0a0c16;
+      cursor: pointer;
+    }
+    .art-card .img-wrap img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    .art-card:hover .img-wrap img { transform: scale(1.05); }
+    .art-card .art-info {
+      padding: 18px 20px 20px;
+    }
+    .art-card .art-info h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+    .art-card .art-info .artist {
+      color: #8a92a8;
       font-size: 0.85rem;
     }
-    .reply-form textarea { flex-basis: 100%; min-height: 40px; border-radius: 12px; }
-    .reply-form .file-input-wrapper { flex-basis: 100%; margin-bottom: 0.3rem; }
-    .reply-form button { background: #1e2648; border: none; padding: 0.4rem 1rem; border-radius: 30px; color: #88b0f0; font-weight: 600; cursor: pointer; font-size: 0.8rem; }
-    .reply-form button:hover { background: #2a3360; color: white; }
-    .reply-form button:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .lock-overlay, .age-overlay { background: rgba(0,0,0,0.85); padding: 1rem; border-radius: 12px; text-align: center; margin: 0.5rem 0; }
-    .lock-overlay input, .age-overlay input { background: #0f1426; border: 1px solid #2a2f4b; color: #e4e6eb; padding: 0.5rem; border-radius: 8px; margin: 0.3rem; }
-    .lock-overlay button, .age-overlay button { background: #0ea5e9; border: none; padding: 0.3rem 1rem; border-radius: 30px; color: white; cursor: pointer; }
-    .lock-overlay button:hover, .age-overlay button:hover { background: #0284c7; }
-
-    .threads-loading { text-align: center; padding: 2rem; color: #7a82a0; }
-    .threads-loading i { font-size: 2rem; display: block; margin-bottom: 0.5rem; color: #38bdf8; }
-
-    .hidden { display: none !important; }
-    .text-muted { color: #7a82a0; font-size: 0.85rem; }
-
-    @media (max-width: 480px) {
-      .top-bar { flex-wrap: wrap; gap: 0.5rem; justify-content: center; }
-      .stats-row .stat-item .num { font-size: 1rem; }
-      .create-thread .row { flex-direction: column; align-items: stretch; }
-      .create-thread .row input { flex: auto; }
-      .btn-primary { width: 100%; justify-content: center; }
-      .filter-row { flex-direction: column; align-items: stretch; }
-      .file-input-wrapper { flex-wrap: wrap; }
-    }
-
-    .auth-modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.8);
-      backdrop-filter: blur(8px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 10000;
-      padding: 1.5rem;
-    }
-    .auth-modal.active { display: flex; }
-    .auth-box {
-      background: #1a1a2e;
-      padding: 2rem 2rem 1.8rem;
-      border-radius: 1.25rem;
-      max-width: 400px;
-      width: 100%;
-      border: 1px solid rgba(255,255,255,0.06);
-      box-shadow: 0 24px 60px rgba(0,0,0,0.5);
-      animation: slideUp 0.25s ease;
-    }
-    .auth-box h2 { font-size: 1.8rem; font-weight: 700; color: #fff; margin-bottom: 0.2rem; text-align: center; }
-    .auth-box .sub { color: #7a82a0; text-align: center; margin-bottom: 1.5rem; font-size: 0.95rem; }
-    .auth-box input { width: 100%; padding: 0.7rem 1rem; margin-bottom: 0.8rem; background: #0f1426; border: 1px solid #2a2f4b; border-radius: 12px; color: #e4e6eb; font-size: 1rem; }
-    .auth-box input:focus { outline: none; border-color: #38bdf8; }
-    .auth-box .auth-btn { width: 100%; padding: 0.7rem; border: none; border-radius: 40px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.2s; color: #fff; background: linear-gradient(135deg, #0ea5e9, #06b6d4); }
-    .auth-box .auth-btn:hover { transform: scale(1.01); box-shadow: 0 0 20px rgba(14,165,233,0.3); }
-    .auth-box .auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .auth-box .auth-switch { text-align: center; margin-top: 1rem; color: #7a82a0; font-size: 0.9rem; }
-    .auth-box .auth-switch a { color: #38bdf8; cursor: pointer; text-decoration: none; }
-    .auth-box .auth-switch a:hover { text-decoration: underline; }
-    .auth-box .auth-error { color: #f43f5e; font-size: 0.85rem; text-align: center; margin-bottom: 0.5rem; min-height: 1.2rem; }
-    .auth-box .auth-close { float: right; background: none; border: none; color: #aaa; font-size: 1.8rem; cursor: pointer; transition: 0.2s; line-height: 1; }
-    .auth-box .auth-close:hover { color: #fff; }
-
-    .tab-btn {
-      background: #13172b;
-      border: 1px solid #2a2f4b;
-      padding: 0.5rem 1.2rem;
-      border-radius: 30px;
-      color: #e4e6eb;
-      cursor: pointer;
-      transition: 0.2s;
-      font-family: inherit;
-      font-size: 0.95rem;
-    }
-    .tab-btn:hover { background: #1e2648; border-color: #3a4065; }
-    .tab-btn.active { background: #1e2648; border-color: #38bdf8; color: #fff; }
-    .members-tab { background: linear-gradient(135deg, #fbbf24, #f59e0b) !important; border-color: transparent !important; color: #0b0d17 !important; font-weight: 700 !important; }
-    .members-tab:hover { background: linear-gradient(135deg, #fcd34d, #d97706) !important; color: #0b0d17 !important; }
-    .members-tab.logged-in { background: linear-gradient(135deg, #2dd4bf, #0ea5e9) !important; color: #fff !important; }
-    .members-tab.logged-in:hover { background: linear-gradient(135deg, #5eead4, #38bdf8) !important; }
-    .tabs-container { display: flex; gap: 0.4rem; margin-bottom: 1rem; flex-wrap: wrap; }
-
-    .admin-toggle-btn {
-      background: linear-gradient(135deg, #ff0033, #cc0033) !important;
-      border-color: #ff0033 !important;
-      color: #fff !important;
-      font-weight: 700 !important;
-      display: none !important;
-    }
-    .admin-toggle-btn.active {
-      display: inline-block !important;
-      box-shadow: 0 0 30px rgba(255,0,51,0.4);
-    }
-    .admin-toggle-btn:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 40px rgba(255,0,51,0.6);
-    }
-
-    .admin-settings-panel {
-      background: #1a1a2e;
-      border: 2px solid #ff0033;
-      border-radius: 16px;
-      padding: 1rem 1.2rem;
-      margin-bottom: 1rem;
-      display: none;
-      box-shadow: 0 0 40px rgba(255,0,51,0.1);
-    }
-    .admin-settings-panel.visible {
-      display: block;
-      animation: fadeUp 0.3s ease;
-    }
-    .admin-settings-panel h4 {
-      color: #ff0033;
-      font-size: 0.9rem;
-      margin-bottom: 0.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .admin-settings-panel .admin-stat {
-      font-size: 0.8rem;
-      color: #aaa;
-      padding: 0.2rem 0;
-    }
-    .admin-settings-panel .admin-stat span { color: #38bdf8; font-weight: 600; }
-    .admin-settings-panel .admin-actions {
-      display: flex;
-      gap: 0.5rem;
-      margin-top: 0.5rem;
-      flex-wrap: wrap;
-    }
-    .admin-settings-panel .admin-actions button {
-      background: #1e2648;
-      border: 1px solid #2a2f4b;
-      color: #e4e6eb;
-      padding: 0.3rem 0.8rem;
-      border-radius: 30px;
-      cursor: pointer;
-      font-size: 0.75rem;
-      transition: 0.2s;
-      font-family: inherit;
-    }
-    .admin-settings-panel .admin-actions button:hover {
-      background: #2a3360;
-      border-color: #38bdf8;
-    }
-    .admin-settings-panel .admin-actions .danger-btn {
-      border-color: #ff0033;
-      color: #ff0033;
-    }
-    .admin-settings-panel .admin-actions .danger-btn:hover {
-      background: #2a0f1a;
-      border-color: #ff0033;
-    }
-
-    .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; margin-top: 1rem; }
-    .gallery-item { aspect-ratio: 1 / 1; background: rgba(255,255,255,0.04); border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); transition: 0.3s; cursor: pointer; position: relative; will-change: transform; }
-    .gallery-item img { width: 100%; height: 100%; object-fit: cover; }
-    .gallery-item:hover { border-color: #0ea5e9; transform: scale(1.02); box-shadow: 0 0 30px rgba(14,165,233,0.15); }
-
-    .library-list { list-style: none; padding: 0; }
-    .library-list li { padding: 0.8rem 1.2rem; margin-bottom: 0.6rem; background: rgba(255,255,255,0.02); border-radius: 12px; border-left: 3px solid #2dd4bf; }
-    .library-list li a { color: #94a3b8; text-decoration: none; font-size: 1.05rem; transition: 0.2s; display: block; }
-    .library-list li a:hover { color: #38bdf8; padding-left: 6px; }
-
-    .members-area {
-      background: #13172b;
-      border-radius: 16px;
-      padding: 1.5rem;
-      border: 1px solid #2a2f4b;
-      margin-top: 0.5rem;
-    }
-    .members-area h2 { font-size: 1.4rem; font-weight: 600; margin-bottom: 0.5rem; color: #2dd4bf; }
-    .members-area .member-create { background: #0f1426; border-radius: 12px; padding: 1rem; margin-bottom: 1rem; border: 1px solid #1e2648; }
-    .members-area .member-create input, .members-area .member-create textarea, .members-area .member-create select {
-      width: 100%; padding: 0.5rem 0.8rem; margin-bottom: 0.5rem; background: #0b0d17; border: 1px solid #2a2f4b; border-radius: 8px; color: #e4e6eb; font-size: 0.95rem;
-    }
-    .members-area .member-create input:focus, .members-area .member-create textarea:focus, .members-area .member-create select:focus { outline: none; border-color: #38bdf8; }
-    .members-area .member-create textarea { min-height: 60px; resize: vertical; }
-    .members-area .member-thread {
-      background: #0f1426;
-      border-radius: 12px;
-      padding: 0.8rem 1rem;
-      margin-bottom: 0.8rem;
-      border: 1px solid #1e2648;
-    }
-    .members-area .member-thread .author { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.2rem; flex-wrap: wrap; }
-    .members-area .member-thread .author img { width: 28px; height: 28px; border-radius: 50%; background: #1e2648; }
-    .members-area .member-thread .author .name { font-weight: 600; font-size: 0.85rem; }
-    .members-area .member-thread .author .time { font-size: 0.65rem; color: #7a82a0; margin-left: auto; }
-    .members-area .member-thread .author .tag-badge { background: #1e2648; padding: 0.1rem 0.4rem; border-radius: 8px; font-size: 0.6rem; color: #88b0f0; }
-    .members-area .member-thread h3 { font-size: 1.05rem; font-weight: 600; margin: 0.2rem 0 0.2rem; }
-    .members-area .member-thread .content { font-size: 0.9rem; color: #c8cee0; line-height: 1.4; }
-    .members-area .member-thread .actions {
-      display: flex; gap: 0.8rem; font-size: 0.75rem; color: #7a82a0; margin-top: 0.3rem; border-top: 1px solid #1e2648; padding-top: 0.3rem; flex-wrap: wrap; align-items: center;
-    }
-    .members-area .member-thread .actions span { display: flex; align-items: center; gap: 0.2rem; cursor: pointer; }
-    .members-area .member-thread .actions .liked { color: #f43f5e; }
-    .members-area .member-thread .actions .edit-btn, .members-area .member-thread .actions .delete-btn {
-      background: none; border: none; color: #7a82a0; cursor: pointer; font-size: 0.75rem; padding: 0 0.2rem; transition: color 0.2s;
-    }
-    .members-area .member-thread .actions .edit-btn:hover { color: #38bdf8; }
-    .members-area .member-thread .actions .delete-btn:hover { color: #f43f5e; }
-    .members-area .member-thread .actions .admin-label {
-      font-size: 0.55rem;
-      color: #ff0033;
-      font-weight: 700;
-      text-transform: uppercase;
-      background: rgba(255,0,51,0.12);
-      padding: 0.05rem 0.4rem;
-      border-radius: 10px;
-      border: 1px solid rgba(255,0,51,0.2);
-    }
-
-    .member-replies { margin-top: 0.5rem; padding-left: 1rem; border-left: 2px solid #2a2f4b; }
-    .member-reply {
-      background: #0b0d17;
-      border-radius: 8px;
-      padding: 0.5rem 0.8rem;
-      margin-bottom: 0.4rem;
-      border: 1px solid #1a1a2e;
-    }
-    .member-reply .author { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.1rem; }
-    .member-reply .author img { width: 20px; height: 20px; border-radius: 50%; background: #1e2648; }
-    .member-reply .author .name { font-weight: 500; font-size: 0.75rem; }
-    .member-reply .author .time { font-size: 0.6rem; color: #7a82a0; margin-left: auto; }
-    .member-reply .content { font-size: 0.85rem; color: #c8cee0; }
-    .member-reply .actions { display: flex; gap: 0.4rem; margin-top: 0.2rem; flex-wrap: wrap; align-items: center; }
-    .member-reply .actions .edit-btn, .member-reply .actions .delete-btn {
-      background: none; border: none; color: #7a82a0; cursor: pointer; font-size: 0.7rem; padding: 0 0.2rem; transition: color 0.2s;
-    }
-    .member-reply .actions .edit-btn:hover { color: #38bdf8; }
-    .member-reply .actions .delete-btn:hover { color: #f43f5e; }
-    .member-reply .actions .admin-label {
-      font-size: 0.5rem;
-      color: #ff0033;
-      font-weight: 700;
-      text-transform: uppercase;
-      background: rgba(255,0,51,0.12);
-      padding: 0.05rem 0.3rem;
-      border-radius: 8px;
-      border: 1px solid rgba(255,0,51,0.2);
-    }
-
-    .member-reply-form { display: flex; gap: 0.3rem; margin-top: 0.4rem; flex-wrap: wrap; }
-    .member-reply-form input, .member-reply-form textarea {
-      flex: 1; min-width: 60px; padding: 0.3rem 0.6rem; background: #0b0d17; border: 1px solid #2a2f4b; border-radius: 20px; color: #e4e6eb; font-size: 0.8rem;
-    }
-    .member-reply-form textarea { flex-basis: 100%; min-height: 30px; border-radius: 8px; }
-    .member-reply-form button { background: #1e2648; border: none; padding: 0.3rem 0.8rem; border-radius: 30px; color: #88b0f0; font-weight: 600; cursor: pointer; font-size: 0.75rem; }
-    .member-reply-form button:hover { background: #2a3360; color: #fff; }
-
-    .signout-btn { margin-top: 1rem; background: #dc2626; border: none; padding: 0.4rem 1.2rem; border-radius: 30px; color: #fff; cursor: pointer; font-weight: 500; transition: 0.2s; font-family: inherit; }
-    .signout-btn:hover { background: #b91c1c; }
-
-    .fullscreen-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.92);
-      backdrop-filter: blur(8px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 10001;
-      padding: 1.5rem;
-    }
-    .fullscreen-overlay.active { display: flex; }
-    .fullscreen-overlay img { max-width: 95%; max-height: 90vh; object-fit: contain; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.8); }
-    .fullscreen-overlay .close-btn { position: absolute; top: 1.5rem; right: 2rem; background: none; border: none; color: #fff; font-size: 2.5rem; cursor: pointer; opacity: 0.7; transition: 0.2s; z-index: 10; }
-    .fullscreen-overlay .close-btn:hover { opacity: 1; transform: rotate(90deg); }
-    .fullscreen-overlay .caption { position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.6); color: rgba(255,255,255,0.8); padding: 0.4rem 1.2rem; border-radius: 30px; font-size: 0.85rem; backdrop-filter: blur(4px); pointer-events: none; white-space: nowrap; }
-
-    .edit-form textarea, .edit-form input[type="text"] {
-      width: 100%;
-      padding: 0.5rem;
-      background: #0f1426;
-      border: 1px solid #2a2f4b;
-      border-radius: 8px;
-      color: #e4e6eb;
-      font-size: 0.95rem;
-      margin-bottom: 0.3rem;
-    }
-    .edit-form .save-btn {
-      background: #0ea5e9;
-      border: none;
-      padding: 0.2rem 1rem;
-      border-radius: 30px;
-      color: white;
-      cursor: pointer;
-      font-size: 0.8rem;
-    }
-    .edit-form .save-btn:hover { background: #0284c7; }
-    .edit-form .cancel-btn {
-      background: transparent;
-      border: 1px solid #7a82a0;
-      padding: 0.2rem 1rem;
-      border-radius: 30px;
-      color: #7a82a0;
-      cursor: pointer;
-      font-size: 0.8rem;
-      margin-left: 0.5rem;
-    }
-    .edit-form .cancel-btn:hover { background: #2a2f4b; }
-
-    /* ─── added skeleton classes ─── */
-    .skeleton-thread {
-      background: #13172b;
-      border-radius: 16px;
-      padding: 1rem 1.2rem;
-      margin-bottom: 1rem;
-      border: 1px solid #2a2f4b;
-      animation: pulse 1.5s ease-in-out infinite;
-    }
-    .skeleton-thread .line {
-      height: 12px;
-      background: #2a2f4b;
-      border-radius: 8px;
+    .art-card .art-info .price {
+      font-weight: 600;
+      font-size: 1rem;
+      color: #ffd700;
       margin: 6px 0;
     }
-    .skeleton-thread .line.short { width: 40%; }
-    .skeleton-thread .line.medium { width: 70%; }
-    .skeleton-thread .line.long { width: 100%; }
-    @keyframes pulse {
-      0% { opacity: 0.6; }
-      50% { opacity: 1; }
-      100% { opacity: 0.6; }
+    .art-card .art-info .price.free { color: #8a92a8; }
+    .art-card .art-info .fusion-tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      background: #7b2fbe33;
+      color: #d4a5ff;
+      padding: 2px 14px;
+      border-radius: 20px;
+      border: 1px solid #7b2fbe55;
     }
+    .art-card .art-info .views {
+      margin-top: 6px;
+      font-size: 0.75rem;
+      color: #5a6278;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .art-card .art-info .views i { color: #00e5ff; }
+    .art-card .art-info .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .art-card .art-info .actions .btn {
+      padding: 6px 16px;
+      font-size: 0.8rem;
+      flex: 1;
+      min-width: 70px;
+    }
+
+    /* ─── LORE CARDS ─── */
+    .lore-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .lore-card {
+      background: #141929;
+      border-radius: 12px;
+      padding: 20px 24px;
+      border: 1px solid #1a1f3a;
+      transition: border-color 0.3s, background 0.3s;
+      cursor: pointer;
+    }
+    .lore-card:hover {
+      border-color: #00e5ff;
+      background: #181e30;
+    }
+    .lore-card h4 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .lore-card p {
+      color: #8a92a8;
+      font-size: 0.9rem;
+    }
+    .lore-card .lore-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      font-size: 0.8rem;
+      color: #5a6278;
+    }
+    .lore-card .lore-meta .tag {
+      background: #1a1f3a;
+      padding: 2px 14px;
+      border-radius: 20px;
+      color: #b0b8cc;
+      font-size: 0.7rem;
+    }
+    .lore-card .lore-views {
+      margin-top: 6px;
+      font-size: 0.7rem;
+      color: #5a6278;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .lore-card .lore-views i { color: #00e5ff; }
+    .locked-lore {
+      opacity: 0.55;
+      filter: grayscale(0.25);
+      position: relative;
+    }
+    .locked-lore::after {
+      content: '🔒';
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      font-size: 1.2rem;
+    }
+
+    /* ─── REQUEST FORM ─── */
+    .request-section {
+      background: #0f1322;
+      padding: 50px 0;
+      border-top: 1px solid #1a1f3a;
+    }
+    .request-form {
+      max-width: 640px;
+      margin: 0 auto;
+      background: #141929;
+      padding: 36px 40px;
+      border-radius: 16px;
+      border: 1px solid #1a1f3a;
+    }
+    .request-form h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.7rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .request-form h3 .highlight { color: #00e5ff; }
+    .request-form .desc {
+      color: #8a92a8;
+      margin-bottom: 24px;
+      font-size: 0.95rem;
+    }
+    .request-form label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #b0b8cc;
+    }
+    .request-form input,
+    .request-form textarea,
+    .request-form select {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid #1a1f3a;
+      background: #0a0c16;
+      color: #e8edf5;
+      font-size: 0.95rem;
+      transition: border-color 0.3s;
+      margin-bottom: 16px;
+      font-family: inherit;
+    }
+    .request-form input:focus,
+    .request-form textarea:focus,
+    .request-form select:focus {
+      outline: none;
+      border-color: #00e5ff;
+      box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.15);
+    }
+    .request-form textarea { min-height: 100px; resize: vertical; }
+    .request-form .btn { width: 100%; padding: 14px; font-size: 1rem; }
+
+    .auth-lock-msg {
+      background: #1a1f35;
+      padding: 24px;
+      border-radius: 12px;
+      text-align: center;
+      border: 1px dashed #00e5ff66;
+    }
+    .auth-lock-msg i { font-size: 2rem; color: #00e5ff; }
+    .auth-lock-msg p { margin-top: 8px; color: #b0b8cc; }
+    .auth-lock-msg a { color: #00e5ff; font-weight: 700; }
+
+    /* ─── LIGHTBOX ─── */
+    .lightbox {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.93);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 40px;
+      backdrop-filter: blur(10px);
+    }
+    .lightbox.active { display: flex; }
+    .lightbox .lb-content {
+      position: relative;
+      max-width: 80vw;
+      max-height: 80vh;
+      text-align: center;
+    }
+    .lightbox .lb-content img {
+      max-width: 100%;
+      max-height: 70vh;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+      border: 1px solid #2a3150;
+    }
+    .lightbox .lb-close {
+      position: absolute;
+      top: -50px;
+      right: -10px;
+      font-size: 2.6rem;
+      color: #fff;
+      cursor: pointer;
+      background: none;
+      border: none;
+      transition: color 0.3s;
+    }
+    .lightbox .lb-close:hover { color: #00e5ff; }
+
+    /* ─── MODALS ─── */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9998;
+      backdrop-filter: blur(8px);
+      padding: 20px;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: #141929;
+      border-radius: 20px;
+      padding: 40px 44px;
+      max-width: 480px;
+      width: 100%;
+      border: 1px solid #1a1f3a;
+      animation: modalFade 0.25s ease;
+    }
+    @keyframes modalFade {
+      from { opacity: 0; transform: scale(0.95) translateY(20px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .modal .modal-close {
+      position: absolute;
+      top: 14px;
+      right: 20px;
+      font-size: 1.8rem;
+      color: #5a6278;
+      cursor: pointer;
+      background: none;
+      border: none;
+      transition: color 0.3s;
+    }
+    .modal .modal-close:hover { color: #fff; }
+    .modal h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 4px;
+    }
+    .modal h2 .highlight { color: #00e5ff; }
+    .modal .modal-sub {
+      color: #8a92a8;
+      margin-bottom: 24px;
+      font-size: 0.95rem;
+    }
+    .modal label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #b0b8cc;
+    }
+    .modal input,
+    .modal textarea,
+    .modal select {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid #1a1f3a;
+      background: #0a0c16;
+      color: #e8edf5;
+      font-size: 0.95rem;
+      margin-bottom: 16px;
+      font-family: inherit;
+    }
+    .modal input:focus,
+    .modal textarea:focus,
+    .modal select:focus {
+      outline: none;
+      border-color: #00e5ff;
+      box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.15);
+    }
+    .modal .btn { width: 100%; padding: 14px; font-size: 1rem; margin-top: 4px; }
+    .modal .switch-link {
+      text-align: center;
+      margin-top: 16px;
+      color: #5a6278;
+      font-size: 0.9rem;
+    }
+    .modal .switch-link a { color: #00e5ff; font-weight: 700; cursor: pointer; }
+    .modal .error-msg {
+      background: #2a0e0e;
+      color: #f07a7a;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .modal .error-msg.show { display: block; }
+    .modal .success-msg {
+      background: #0e2a1a;
+      color: #7ad4a0;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .modal .success-msg.show { display: block; }
+
+    /* ─── ADMIN FAB ─── */
+    .admin-fab {
+      position: fixed;
+      bottom: 30px;
+      left: 30px;
+      z-index: 9000;
+      background: #ff0044;
+      color: #fff;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      box-shadow: 0 8px 30px rgba(255, 0, 68, 0.4);
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+      border: none;
+    }
+    .admin-fab:hover {
+      transform: scale(1.08);
+      box-shadow: 0 12px 40px rgba(255, 0, 68, 0.6);
+    }
+    .admin-fab.hidden { display: none; }
+
+    /* ─── TOAST ─── */
+    .toast-container {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .toast {
+      background: #141929;
+      color: #e8edf5;
+      padding: 14px 24px;
+      border-radius: 12px;
+      border-left: 4px solid #00e5ff;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+      animation: slideIn 0.3s ease;
+      min-width: 260px;
+      font-size: 0.95rem;
+      border: 1px solid #1a1f3a;
+    }
+    .toast.success { border-left-color: #4ade80; }
+    .toast.error { border-left-color: #f87171; }
+    .toast.info { border-left-color: #60a5fa; }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(40px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      background: #080b14;
+      padding: 30px 0;
+      text-align: center;
+      border-top: 1px solid #1a1f3a;
+      color: #5a6278;
+      font-size: 0.85rem;
+    }
+    footer a { color: #8a92a8; }
+    footer a:hover { color: #00e5ff; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 768px) {
+      .navbar { flex-direction: column; align-items: stretch; gap: 10px; }
+      .nav-links { justify-content: center; flex-wrap: wrap; }
+      .hero h1 { font-size: 2.4rem; }
+      .section-title { font-size: 1.8rem; }
+      .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
+      .modal { padding: 28px 20px; }
+      .request-form { padding: 24px 20px; }
+      .admin-fab { width: 50px; height: 50px; font-size: 1.4rem; bottom: 20px; left: 20px; }
+    }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
 
-  <div class="intro-overlay">
-    <div class="intro-logo"><i class="fas fa-globe-americas"></i> World</div>
-    <div class="intro-text">Your universe awaits</div>
-    <div class="intro-loader"></div>
-  </div>
+  <!-- ─── HEADER ─── -->
+  <header>
+    <div class="container navbar">
+      <div class="logo"><i class="fas fa-bolt"></i><span class="pika">PK</span><span class="anime">-</span><span class="fusion">Jump</span></div>
+      <div class="nav-links" id="navLinks"></div>
+    </div>
+  </header>
 
-  <div class="main-content">
+  <!-- ─── HERO ─── -->
+  <section class="hero">
     <div class="container">
-
-      <div class="top-bar">
-        <div class="logo"><i class="fas fa-globe-americas"></i> World</div>
-        <div class="visitor-badge" id="visitorBadge"><i class="fas fa-user"></i><span id="visitorCount">0</span></div>
-        <div class="auth-badge" id="auth-status"><i class="fas fa-user-secret"></i> Anonymous</div>
+      <div class="hero-tag"><i class="fas fa-palette"></i> Pokémon × Anime Crossover Art</div>
+      <h1><span class="pika">PK</span><span class="anime">-</span><span class="fusion">Jump</span> <span style="font-size:0.6em;color:#b0b8cc;">Neon</span></h1>
+      <p>Fusing Pokémon with your favorite anime &amp; manga — every view counts, every time.<br /><span style="color:#00e5ff;">Sign in to unlock the full multiverse.</span></p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <a href="#" class="btn btn-primary"><i class="fas fa-image"></i> Explore Fusions</a>
+        <a href="#" class="btn btn-outline"><i class="fas fa-pen-fancy"></i> Request Fusion</a>
       </div>
+    </div>
+  </section>
 
-      <div class="tabs-container">
-        <button class="tab-btn active" data-tab="home">🌍 Home</button>
-        <button class="tab-btn" data-tab="games">🎮 Games</button>
-        <button class="tab-btn" data-tab="gallery">🖼 Gallery</button>
-        <button class="tab-btn" data-tab="library">📚 Library</button>
-        <button class="tab-btn members-tab" id="membersTab">🔒 Members-Only</button>
-        <button class="tab-btn admin-toggle-btn" id="adminToggleBtn">⚙️ Admin</button>
+  <!-- ─── STATS BAR ─── -->
+  <section class="stats-bar">
+    <div class="container">
+      <div class="stats-grid">
+        <span><i class="fas fa-eye"></i> <strong id="statVisitors">0</strong> visitors</span>
+        <span><i class="fas fa-user"></i> <strong id="statUsers">0</strong> members</span>
+        <span><i class="fas fa-shield-alt"></i> <strong id="statAdmins">0</strong> admins</span>
+        <span><i class="fas fa-comment"></i> <strong id="statLores">0</strong> lores</span>
+        <span><i class="fas fa-reply"></i> <strong id="statReplies">0</strong> replies</span>
+        <span><i class="fas fa-paint-brush"></i> <strong id="statArt">0</strong> artworks</span>
+        <span><i class="fas fa-chart-line"></i> <strong id="statArtViews">0</strong> art views</span>
       </div>
+    </div>
+  </section>
 
-      <div class="stats-row">
-        <div class="stat-item"><span class="num" id="stat-threads">0</span><span class="label">Threads</span></div>
-        <div class="stat-item"><span class="num" id="stat-replies">0</span><span class="label">Replies</span></div>
-        <div class="stat-item"><span class="num" id="stat-online">0</span><span class="label">Online</span></div>
-        <div class="stat-item"><span class="num" id="stat-total">0</span><span class="label">Total Visits</span></div>
+  <!-- ─── GALLERY ─── -->
+  <section class="section-block" id="gallery">
+    <div class="container">
+      <h2 class="section-title">⚡ <span class="highlight">Fusion</span> Gallery</h2>
+      <p class="section-subtitle">Click any image to view full size — <span style="color:#00e5ff;">members only</span>. <span style="color:#ff6bff;">Subscribers</span> can download.</p>
+      <div class="gallery-grid" id="galleryGrid"></div>
+    </div>
+  </section>
+
+  <!-- ─── PUBLIC LORE ─── -->
+  <section class="section-block" id="publicLoreSection">
+    <div class="container">
+      <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;margin-bottom:28px;">
+        <h2 class="section-title" style="font-size:2rem;"><i class="fas fa-gamepad"></i> Pokémon Hacked ROM Releases</h2>
+        <span class="badge badge-romhack"><i class="fas fa-rom"></i> ROM Hacks</span>
+        <button class="btn btn-primary btn-sm new-lore-btn" data-type="public" style="display:none;"><i class="fas fa-plus"></i> New Lore</button>
       </div>
+      <div class="lore-list" id="publicLores"></div>
+    </div>
+  </section>
 
-      <div class="admin-settings-panel" id="adminSettingsPanel">
-        <h4><i class="fas fa-shield-alt"></i> Admin Control Panel</h4>
-        <div class="admin-stat">👤 Logged in as: <span id="adminEmailDisplay">hungbbcllc@gmail.com</span></div>
-        <div class="admin-stat">📊 Total threads: <span id="adminTotalThreads">0</span></div>
-        <div class="admin-stat">💬 Total replies: <span id="adminTotalReplies">0</span></div>
-        <div class="admin-stat">👥 Total users: <span id="adminTotalUsers">0</span></div>
-        <div class="admin-actions">
-          <button onclick="loadThreads(); loadMemberThreads(); updateAdminStats();">🔄 Refresh All</button>
-          <button class="danger-btn" onclick="if(confirm('Clear all public threads and replies?')){clearAllPublic();}">🗑️ Clear Public</button>
-          <button class="danger-btn" onclick="if(confirm('Clear all member threads and replies?')){clearAllMember();}">🗑️ Clear Members</button>
-        </div>
+  <!-- ─── MEMBER LORE ─── -->
+  <section class="section-block" id="memberLoreSection">
+    <div class="container">
+      <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;margin-bottom:28px;">
+        <h2 class="section-title" style="font-size:2rem;"><i class="fas fa-users"></i> Member Lore</h2>
+        <span class="badge badge-member"><i class="fas fa-lock"></i> Members</span>
+        <button class="btn btn-primary btn-sm new-lore-btn" data-type="member" style="display:none;"><i class="fas fa-plus"></i> New Lore</button>
       </div>
+      <div class="lore-list" id="memberLores"></div>
+    </div>
+  </section>
 
-      <div class="panel active" id="panel-home">
-        <div class="create-thread">
-          <h3><i class="fas fa-pen-fancy" style="color:#2dd4bf;"></i> New thread</h3>
-          <input type="text" id="thread-title" placeholder="Title..." />
-          <textarea id="thread-content" placeholder="Write your first post..."></textarea>
-          <select id="thread-tag" class="tag-select" required>
-            <option value="">Select a tag...</option>
-            <option value="Finance">Finance</option><option value="Gaming">Gaming</option>
-            <option value="Technology">Technology</option><option value="Marketing">Marketing</option>
-            <option value="Health">Health</option><option value="Travel">Travel</option>
-            <option value="Food">Food</option><option value="DIY">DIY</option>
-            <option value="Parenting">Parenting</option><option value="Productivity">Productivity</option>
-            <option value="Pets">Pets</option><option value="Fashion">Fashion</option>
+  <!-- ─── SUBSCRIBER LORE ─── -->
+  <section class="section-block" id="subscriberLoreSection">
+    <div class="container">
+      <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;margin-bottom:28px;">
+        <h2 class="section-title" style="font-size:2rem;"><i class="fas fa-crown"></i> Subscriber‑Only <span style="color:#ffd700;">Exclusive</span></h2>
+        <span class="badge badge-subscriber"><i class="fas fa-star"></i> Subscribers</span>
+        <button class="btn btn-primary btn-sm new-lore-btn" data-type="subscriber" style="display:none;"><i class="fas fa-plus"></i> New Lore</button>
+      </div>
+      <div class="lore-list" id="subscriberLores"></div>
+    </div>
+  </section>
+
+  <!-- ─── REQUEST FORM ─── -->
+  <section class="request-section" id="custom-art">
+    <div class="container">
+      <div class="request-form" id="artRequestForm">
+        <h3>🌀 <span class="highlight">Fusion</span> Request</h3>
+        <p class="desc">Tell us which Pokémon and which anime/manga to fuse — we'll build a new lore bridge using Pokédex entries and game canon, then create custom art for you. <span style="color:#00e5ff;">Free for members &amp; subscribers.</span></p>
+        <div id="requestAuthMsg" class="auth-lock-msg"><i class="fas fa-lock"></i><p>Please <a href="#" id="requestLoginLink">sign in</a> or <a href="#" id="requestSignupLink">sign up</a> to request a fusion.</p></div>
+        <div id="requestFormFields" class="hidden">
+          <label for="artTitle">Fusion Title *</label>
+          <input type="text" id="artTitle" placeholder="e.g. 'Charizard × Guts (Berserk)'" />
+          <label for="artDesc">Fusion Concept / Description *</label>
+          <textarea id="artDesc" placeholder="Describe the fusion: which Pokémon, which anime character, how the lore connects…"></textarea>
+          <label for="artStyle">Anime / Manga Style</label>
+          <select id="artStyle">
+            <option value="shonen">Shonen (Naruto, DBZ, One Piece, etc.)</option>
+            <option value="seinen">Seinen (Berserk, Ghost in the Shell, etc.)</option>
+            <option value="shoujo">Shoujo (Sailor Moon, Fruits Basket, etc.)</option>
+            <option value="mecha">Mecha (Gundam, Evangelion, etc.)</option>
+            <option value="isekai">Isekai (Re:Zero, Shield Hero, etc.)</option>
+            <option value="other">Other</option>
           </select>
-          <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.5rem 0;">
-            <label style="display: flex; align-items: center; gap: 0.3rem; color: #aaa;">
-              <input type="checkbox" id="thread-blur" /> Blur image
-            </label>
-            <input type="text" id="thread-password" placeholder="Password lock (optional)" style="flex:1; min-width:120px; background:#0f1426; border:1px solid #2a2f4b; border-radius:12px; color:#e4e6eb; padding:0.6rem 0.9rem;" />
-            <input type="number" id="thread-age" placeholder="Min age (0=none)" style="width:100px; background:#0f1426; border:1px solid #2a2f4b; border-radius:12px; color:#e4e6eb; padding:0.6rem 0.9rem;" />
-          </div>
-          <div class="file-input-wrapper">
-            <input type="file" id="thread-image-input" accept="image/*" />
-            <label for="thread-image-input"><i class="fas fa-image"></i> Add image</label>
-            <img id="thread-image-preview" class="preview" alt="preview" />
-            <span class="filename" id="thread-image-filename"></span>
-          </div>
-          <div class="file-input-wrapper">
-            <input type="file" id="thread-media-input" accept="video/*,.zip,.rar,.7z,.pdf,.doc,.docx,.txt" />
-            <label for="thread-media-input"><i class="fas fa-video"></i> Add video or file</label>
-            <span class="filename" id="thread-media-filename"></span>
-          </div>
-          <div class="row" style="display:flex; flex-wrap:wrap; gap:0.6rem; align-items:center;">
-            <input type="text" id="author-name" placeholder="Your name (optional)" style="flex:2; min-width:120px;" />
-            <button class="btn-primary" id="create-thread-btn"><i class="fas fa-paper-plane"></i> Post</button>
-            <span id="thread-status" class="status-msg" style="display:none;"></span>
-          </div>
-        </div>
-
-        <div class="filter-row">
-          <span style="font-size:0.85rem; color:#7a82a0;">Filter by tag:</span>
-          <select id="publicTagFilter">
-            <option value="all">All tags</option>
-            <option value="Finance">Finance</option><option value="Gaming">Gaming</option>
-            <option value="Technology">Technology</option><option value="Marketing">Marketing</option>
-            <option value="Health">Health</option><option value="Travel">Travel</option>
-            <option value="Food">Food</option><option value="DIY">DIY</option>
-            <option value="Parenting">Parenting</option><option value="Productivity">Productivity</option>
-            <option value="Pets">Pets</option><option value="Fashion">Fashion</option>
-          </select>
-        </div>
-
-        <div id="threads-container"></div>
-      </div>
-
-      <div class="panel" id="panel-games">
-        <h2 style="font-weight:300; margin-bottom:1.2rem;">🎮 Games <span style="opacity:0.4;font-size:0.8rem;">(gaming discussions)</span></h2>
-        <p style="color:#7a82a0;">Game-related threads and discussions will appear here.</p>
-      </div>
-
-      <div class="panel" id="panel-gallery">
-        <h2 style="font-weight:300; margin-bottom:1.2rem;">🖼 Gallery</h2>
-        <div class="gallery-grid" id="galleryGrid">
-          <p style="color:#7a82a0; grid-column:1/-1; text-align:center;">Loading images...</p>
+          <button class="btn btn-primary" id="submitArtRequest"><i class="fas fa-paper-plane"></i> Send Fusion Request</button>
         </div>
       </div>
+    </div>
+  </section>
 
-      <div class="panel" id="panel-library">
-        <h2 style="font-weight:300; margin-bottom:1.2rem;">📚 Library <span style="opacity:0.4;font-size:0.8rem;">(Productivity)</span></h2>
-        <div id="libraryContainer"><p style="color:#7a82a0;">Loading productivity threads...</p></div>
-      </div>
+  <!-- ─── FOOTER ─── -->
+  <footer>
+    <div class="container">
+      <p><strong style="color:#00e5ff;">⚡ PK‑Jump Neon</strong> · Pokémon × Anime Crossover Art · <span style="color:#5a6278;">Built with ❤️ for fans</span></p>
+    </div>
+  </footer>
 
-      <div class="panel" id="panel-members">
-        <div class="members-area" id="membersArea">
-          <div id="memberContent">
-            <h2>🔒 Members Area</h2>
-            <p style="color:#7a82a0; margin-bottom:1rem;">Welcome, <span id="memberEmail"></span>! Post and reply here – only members can see this.</p>
-            <div class="member-create" id="memberCreateThread">
-              <input type="text" id="member-thread-title" placeholder="Thread title..." />
-              <textarea id="member-thread-content" placeholder="Write your post..."></textarea>
-              <select id="member-thread-tag" class="tag-select" required>
-                <option value="">Select a tag...</option>
-                <option value="Finance">Finance</option><option value="Gaming">Gaming</option>
-                <option value="Technology">Technology</option><option value="Marketing">Marketing</option>
-                <option value="Health">Health</option><option value="Travel">Travel</option>
-                <option value="Food">Food</option><option value="DIY">DIY</option>
-                <option value="Parenting">Parenting</option><option value="Productivity">Productivity</option>
-                <option value="Pets">Pets</option><option value="Fashion">Fashion</option>
-              </select>
-              <div class="file-input-wrapper">
-                <input type="file" id="member-image-input" accept="image/*" />
-                <label for="member-image-input"><i class="fas fa-image"></i> Add image</label>
-                <img id="member-image-preview" class="preview" alt="preview" />
-                <span class="filename" id="member-image-filename"></span>
-              </div>
-              <div class="file-input-wrapper">
-                <input type="file" id="member-media-input" accept="video/*,.zip,.rar,.7z,.pdf,.doc,.docx,.txt" />
-                <label for="member-media-input"><i class="fas fa-video"></i> Add video or file</label>
-                <span class="filename" id="member-media-filename"></span>
-              </div>
-              <button class="btn-primary" id="member-create-btn" style="padding:0.4rem 1.2rem; font-size:0.9rem;">Post to Members</button>
-              <span id="member-thread-status" class="status-msg" style="display:none;"></span>
-            </div>
-            <div class="filter-row">
-              <span style="font-size:0.85rem; color:#7a82a0;">Filter:</span>
-              <select id="memberTagFilter">
-                <option value="all">All tags</option>
-                <option value="Finance">Finance</option><option value="Gaming">Gaming</option>
-                <option value="Technology">Technology</option><option value="Marketing">Marketing</option>
-                <option value="Health">Health</option><option value="Travel">Travel</option>
-                <option value="Food">Food</option><option value="DIY">DIY</option>
-                <option value="Parenting">Parenting</option><option value="Productivity">Productivity</option>
-                <option value="Pets">Pets</option><option value="Fashion">Fashion</option>
-              </select>
-            </div>
-            <div id="memberThreadsContainer"><p style="color:#7a82a0; text-align:center; padding:1rem;">Loading member threads...</p></div>
-            <button class="signout-btn" id="signoutBtn"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
-          </div>
-          <div id="memberLoginPrompt" style="display:none; text-align:center; padding:2rem;">
-            <p style="color:#7a82a0;">🔒 Please <a id="memberLoginLink" style="color:#38bdf8; cursor:pointer;">sign in</a> to view and post in the Members Area.</p>
-          </div>
-        </div>
-      </div>
-
+  <!-- ─── LIGHTBOX ─── -->
+  <div class="lightbox" id="lightbox">
+    <div class="lb-content">
+      <button class="lb-close" id="lbClose">&times;</button>
+      <img id="lbImage" src="" alt="Fusion Art" />
+      <div class="lb-caption" id="lbCaption" style="color:#b0b8cc;margin-top:12px;"></div>
     </div>
   </div>
 
-  <div class="auth-modal" id="authModal">
-    <div class="auth-box">
-      <button class="auth-close" id="authClose">&times;</button>
-      <h2 id="authTitle">Sign In</h2>
-      <p class="sub" id="authSub">Enter your credentials to access members-only content.</p>
-      <div class="auth-error" id="authError"></div>
-      <input type="email" id="authEmail" placeholder="Email" />
-      <input type="password" id="authPassword" placeholder="Password" />
-      <button class="auth-btn" id="authSubmit">Sign In</button>
-      <div class="auth-switch">
-        <span id="authSwitchText">Don't have an account?</span>
-        <a id="authSwitchLink">Sign Up</a>
-      </div>
+  <!-- ─── AUTH MODALS ─── -->
+  <div class="modal-overlay" id="loginModal">
+    <div class="modal" style="position:relative;">
+      <button class="modal-close" id="loginClose">&times;</button>
+      <h2>Welcome <span class="highlight">Back</span></h2>
+      <p class="modal-sub">Sign in to the PK‑Jump multiverse.</p>
+      <div class="error-msg" id="loginError">Invalid email or password.</div>
+      <label for="loginEmail">Email</label>
+      <input type="email" id="loginEmail" placeholder="you@example.com" />
+      <label for="loginPassword">Password</label>
+      <input type="password" id="loginPassword" placeholder="••••••••" />
+      <button class="btn btn-primary" id="loginBtn"><i class="fas fa-sign-in-alt"></i> Sign In</button>
+      <div class="switch-link">Don't have an account? <a id="loginToSignup">Sign Up</a></div>
     </div>
   </div>
 
-  <div class="fullscreen-overlay" id="fullscreenOverlay">
-    <button class="close-btn" id="fullscreenClose">&times;</button>
-    <img id="fullscreenImage" src="" alt="Fullscreen view" />
-    <div class="caption" id="fullscreenCaption"></div>
+  <div class="modal-overlay" id="signupModal">
+    <div class="modal" style="position:relative;">
+      <button class="modal-close" id="signupClose">&times;</button>
+      <h2>Join <span class="highlight">PK‑Jump</span></h2>
+      <p class="modal-sub">Create your free account today.</p>
+      <div class="error-msg" id="signupError">Please fill in all fields.</div>
+      <div class="success-msg" id="signupSuccess">Account created! Please sign in.</div>
+      <label for="signupName">Full Name</label>
+      <input type="text" id="signupName" placeholder="Ash Ketchum" />
+      <label for="signupEmail">Email</label>
+      <input type="email" id="signupEmail" placeholder="you@example.com" />
+      <label for="signupPassword">Password (min 6 chars)</label>
+      <input type="password" id="signupPassword" placeholder="••••••••" />
+      <button class="btn btn-primary" id="signupBtn"><i class="fas fa-user-plus"></i> Create Account</button>
+      <div class="switch-link">Already have an account? <a id="signupToLogin">Sign In</a></div>
+    </div>
   </div>
 
+  <!-- ─── ADMIN MODAL ─── -->
+  <div class="modal-overlay" id="adminModal">
+    <div class="modal" style="position:relative;max-width:500px;">
+      <button class="modal-close" id="adminClose">&times;</button>
+      <h2><span class="highlight">Admin</span> — Add Fusion Art</h2>
+      <p class="modal-sub">Upload a new artwork to the gallery.</p>
+      <div class="error-msg" id="adminError">Please fill in all fields.</div>
+      <div class="success-msg" id="adminSuccess">Artwork added successfully!</div>
+      <label for="adminTitle">Title *</label><input type="text" id="adminTitle" placeholder="e.g. 'Pikachu × Naruto'" />
+      <label for="adminArtist">Artist *</label><input type="text" id="adminArtist" placeholder="Your name" />
+      <label for="adminDesc">Description</label><textarea id="adminDesc" placeholder="Short description of the fusion"></textarea>
+      <label for="adminPrice">Price (e.g. 'Free Download' or '$420')</label><input type="text" id="adminPrice" placeholder="Free Download" />
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <input type="checkbox" id="adminSubscriberOnly" />
+        <label for="adminSubscriberOnly" style="margin:0;">🔒 Subscriber Only</label>
+      </div>
+      <label for="adminImage">Main Image * (PNG, JPG, WEBP)</label><input type="file" id="adminImage" accept="image/*" />
+      <label for="adminThumbnail">Thumbnail Image (optional)</label><input type="file" id="adminThumbnail" accept="image/*" />
+      <button class="btn btn-primary" id="adminSubmitBtn"><i class="fas fa-upload"></i> Upload & Publish</button>
+    </div>
+  </div>
+
+  <!-- ─── NEW LORE MODAL ─── -->
+  <div class="modal-overlay" id="loreModal">
+    <div class="modal" style="position:relative;max-width:500px;">
+      <button class="modal-close" id="loreClose">&times;</button>
+      <h2><span class="highlight">New</span> Lore</h2>
+      <p class="modal-sub">Create a new lore post.</p>
+      <div class="error-msg" id="loreError">Please fill in all fields.</div>
+      <div class="success-msg" id="loreSuccess">Lore created!</div>
+      <label for="loreTitle">Title *</label>
+      <input type="text" id="loreTitle" placeholder="Lore title" />
+      <label for="loreAuthor">Author *</label>
+      <input type="text" id="loreAuthor" placeholder="Author name" />
+      <label for="loreDesc">Description *</label>
+      <textarea id="loreDesc" placeholder="Brief description of the lore"></textarea>
+      <label for="loreType">Lore Type *</label>
+      <select id="loreType">
+        <option value="public">Pokémon Hacked ROM Releases</option>
+        <option value="member">Member Lore</option>
+        <option value="subscriber">Subscriber‑Only</option>
+      </select>
+      <button class="btn btn-primary" id="loreSubmitBtn"><i class="fas fa-plus-circle"></i> Create Lore</button>
+    </div>
+  </div>
+
+  <!-- ─── ADMIN FAB ─── -->
+  <button class="admin-fab hidden" id="adminFab" title="Admin Panel"><i class="fas fa-plus"></i></button>
+
+  <!-- ─── TOAST CONTAINER ─── -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ─── JAVASCRIPT ────────────────────────────────────────── -->
   <script>
-    // ─── CONFIG ──────────────────────────────────────────────
-    const SUPABASE_URL = 'https://divcsisxjrbruduyophx.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_PSpZ4GImD-mCAau3F2U6LA_W757gdMM';
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    (function() {
+      'use strict';
 
-    // ─── STATE ──────────────────────────────────────────────
-    let currentUser = null, currentSession = null;
-    let isLoginMode = true;
-    let threadCache = [];
-    let memberThreadCache = [];
+      // ─── CONFIG ────────────────────────────────────────────────
+      const SUPABASE_URL = 'https://divcsisxjrbruduyophx.supabase.co';
+      const SUPABASE_ANON_KEY = 'sb_publishable_PSpZ4GImD-mCAau3F2U6LA_W757gdMM';
+      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // ─── DOM REFS ────────────────────────────────────────────
-    const $ = id => document.getElementById(id);
-    const container = $('threads-container');
-    const memberContainer = $('memberThreadsContainer');
+      // ─── HARDCODED ADMIN EMAIL ───────────────────────────────
+      const ADMIN_EMAIL = 'hungbbcllc@gmail.com';
 
-    // ─── HELPERS (same as original) ────────────────────────
-    function sanitizeInput(text) {
-      if (!text) return '';
-      const temp = document.createElement('div');
-      temp.textContent = text;
-      return temp.innerHTML;
-    }
-    async function sha256(message) {
-      const msgBuffer = new TextEncoder().encode(message);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    }
-    function saveName(name) { if (name && name.trim()) localStorage.setItem('forum_username', name.trim()); }
-    function loadName() { return localStorage.getItem('forum_username') || ''; }
-    function getUserName() { const stored = loadName(); return stored || 'Anonymous'; }
-    function getAvatar(name) {
-      const initial = name && name.trim() ? name.charAt(0).toUpperCase() : '?';
-      return `https://ui-avatars.com/api/?name=${encodeURIComponent(initial)}&background=1e2648&color=38bdf8&size=64&bold=true`;
-    }
-    function playPopSound() {
-      try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillator = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
-        oscillator.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-        oscillator.frequency.value = 800;
-        gainNode.gain.value = 0.08;
-        oscillator.start();
-        oscillator.stop(audioCtx.currentTime + 0.05);
-      } catch(e) { /* ignore */ }
-    }
-    function triggerHaptics() { if (navigator.vibrate) navigator.vibrate(10); }
-    function setStatus(element, message, type = 'sending') {
-      if (!element) return;
-      element.textContent = message;
-      element.className = `status-msg ${type}`;
-      element.style.display = 'inline-block';
-      if (type === 'sent' || type === 'error') {
-        setTimeout(() => { element.style.display = 'none'; }, 3000);
-      }
-    }
-    function getUserDisplay(name) {
-      const trimmed = name ? name.trim() : '';
-      if (!trimmed) { return { displayName: 'Unverified', role: 'unverified', badge: '<span class="unverified-badge">Unverified</span>' }; }
-      const lower = trimmed.toLowerCase();
-      if (lower === 'admin') { return { displayName: trimmed, role: 'admin', badge: '<span class="admin-badge">Admin</span>' }; }
-      if (lower === 'mod') { return { displayName: trimmed, role: 'mod', badge: '<span class="mod-badge">Mod</span>' }; }
-      return { displayName: trimmed, role: 'user', badge: '' };
-    }
-    function getSessionId() {
-      let id = localStorage.getItem('forum_session_id');
-      if (!id) {
-        id = crypto.randomUUID ? crypto.randomUUID() : 'sess_' + Date.now() + '_' + Math.random().toString(36).slice(2);
-        localStorage.setItem('forum_session_id', id);
-      }
-      return id;
-    }
-    function isAdmin() { return currentUser && currentUser.email === 'hungbbcllc@gmail.com'; }
-    function isOwner(authorId) { return currentUser && currentUser.id === authorId; }
+      // ─── STATE ────────────────────────────────────────────────
+      let currentUser = null;
+      let isLoggedIn = false;
+      let isAdmin = false;
+      let galleryData = [];
+      let publicLoresData = [];
+      let memberLoreData = [];
+      let subscriberLoresData = [];
 
-    // ─── AUTH ──────────────────────────────────────────────
-    const authModal = $('authModal');
-    const authClose = $('authClose');
-    const authTitle = $('authTitle');
-    const authSub = $('authSub');
-    const authEmail = $('authEmail');
-    const authPassword = $('authPassword');
-    const authSubmit = $('authSubmit');
-    const authError = $('authError');
-    const authSwitchLink = $('authSwitchLink');
-    const authSwitchText = $('authSwitchText');
-    const membersTab = $('membersTab');
-    const memberEmail = $('memberEmail');
-    const signoutBtn = $('signoutBtn');
-    const memberContent = $('memberContent');
-    const memberLoginPrompt = $('memberLoginPrompt');
-    const memberLoginLink = $('memberLoginLink');
-    const adminToggleBtn = $('adminToggleBtn');
-    const adminSettingsPanel = $('adminSettingsPanel');
+      // ─── DOM REFS ──────────────────────────────────────────────
+      const $ = (sel) => document.querySelector(sel);
+      const $$ = (sel) => document.querySelectorAll(sel);
 
-    const allPanels = ['home', 'games', 'gallery', 'library', 'members'];
-    const panelElements = {
-      home: $('panel-home'),
-      games: $('panel-games'),
-      gallery: $('panel-gallery'),
-      library: $('panel-library'),
-      members: $('panel-members')
-    };
-    const tabButtons = document.querySelectorAll('.tab-btn:not(#membersTab):not(#adminToggleBtn)');
-    const membersTabBtn = membersTab;
+      const navLinks = $('#navLinks');
+      const galleryGrid = $('#galleryGrid');
+      const publicLoresEl = $('#publicLores');
+      const memberLoresEl = $('#memberLores');
+      const subscriberLoresEl = $('#subscriberLores');
 
-    function updateAdminUI() {
-      const admin = isAdmin();
-      const authBadge = $('auth-status');
-      if (admin) {
-        authBadge.innerHTML = `<i class="fas fa-crown"></i> Admin: ${currentUser.email}`;
-        authBadge.className = 'auth-badge admin-badge-top';
-        adminToggleBtn.classList.add('active');
-        adminSettingsPanel.classList.add('visible');
-        updateAdminStats();
-      } else {
-        if (currentUser) {
-          authBadge.innerHTML = `<i class="fas fa-check-circle" style="color:#2dd4bf;"></i> ${currentUser.email}`;
-          authBadge.className = 'auth-badge';
-        } else {
-          authBadge.innerHTML = `<i class="fas fa-user-secret"></i> Anonymous`;
-          authBadge.className = 'auth-badge';
-        }
-        adminToggleBtn.classList.remove('active');
-        adminSettingsPanel.classList.remove('visible');
-      }
-    }
+      const lightbox = $('#lightbox');
+      const lbImage = $('#lbImage');
+      const lbCaption = $('#lbCaption');
+      const lbClose = $('#lbClose');
 
-    async function updateAdminStats() {
-      if (!isAdmin()) return;
-      try {
-        const { count: threads } = await supabaseClient.from('threads').select('*', { count: 'exact', head: true });
-        const { count: posts } = await supabaseClient.from('posts').select('*', { count: 'exact', head: true });
-        const { count: users } = await supabaseClient.auth.admin.listUsers().then(r => ({ count: r.data?.users?.length || 0 }));
-        $('adminTotalThreads').textContent = threads || 0;
-        $('adminTotalReplies').textContent = posts || 0;
-        $('adminTotalUsers').textContent = users || 0;
-      } catch(e) { /* ignore */ }
-    }
+      const loginModal = $('#loginModal');
+      const signupModal = $('#signupModal');
+      const adminModal = $('#adminModal');
+      const loreModal = $('#loreModal');
+      const loginClose = $('#loginClose');
+      const signupClose = $('#signupClose');
+      const adminClose = $('#adminClose');
+      const loreClose = $('#loreClose');
+      const loginToSignup = $('#loginToSignup');
+      const signupToLogin = $('#signupToLogin');
+      const loginBtn = $('#loginBtn');
+      const signupBtn = $('#signupBtn');
+      const loginEmail = $('#loginEmail');
+      const loginPassword = $('#loginPassword');
+      const signupName = $('#signupName');
+      const signupEmail = $('#signupEmail');
+      const signupPassword = $('#signupPassword');
+      const loginError = $('#loginError');
+      const signupError = $('#signupError');
+      const signupSuccess = $('#signupSuccess');
 
-    window.clearAllPublic = async function() {
-      try {
-        await supabaseClient.from('threads').delete().neq('id', 0);
-        await supabaseClient.from('posts').delete().neq('id', 0);
-        loadThreads();
-        updateAdminStats();
-        alert('✅ All public threads and replies cleared.');
-      } catch(e) { alert('❌ Error: ' + e.message); }
-    };
+      const requestAuthMsg = $('#requestAuthMsg');
+      const requestFormFields = $('#requestFormFields');
+      const requestLoginLink = $('#requestLoginLink');
+      const requestSignupLink = $('#requestSignupLink');
+      const submitArtRequest = $('#submitArtRequest');
+      const artTitle = $('#artTitle');
+      const artDesc = $('#artDesc');
+      const artStyle = $('#artStyle');
 
-    window.clearAllMember = async function() {
-      try {
-        await supabaseClient.from('member_threads').delete().neq('id', 0);
-        await supabaseClient.from('member_posts').delete().neq('id', 0);
-        loadMemberThreads();
-        updateAdminStats();
-        alert('✅ All member threads and replies cleared.');
-      } catch(e) { alert('❌ Error: ' + e.message); }
-    };
+      const adminFab = $('#adminFab');
+      const adminTitle = $('#adminTitle');
+      const adminArtist = $('#adminArtist');
+      const adminDesc = $('#adminDesc');
+      const adminPrice = $('#adminPrice');
+      const adminImage = $('#adminImage');
+      const adminThumbnail = $('#adminThumbnail');
+      const adminSubscriberOnly = $('#adminSubscriberOnly');
+      const adminSubmitBtn = $('#adminSubmitBtn');
+      const adminError = $('#adminError');
+      const adminSuccess = $('#adminSuccess');
 
-    async function checkAuth() {
-      const { data: { session }, error } = await supabaseClient.auth.getSession();
-      if (error) { console.error('Auth error:', error); return; }
-      if (session) {
-        currentSession = session;
-        currentUser = session.user;
-        updateUIForLoggedIn();
-      } else {
-        currentUser = null;
-        currentSession = null;
-        updateUIForLoggedOut();
-      }
-      updateAdminUI();
-      loadThreads();
-      if (currentUser) loadMemberThreads();
-    }
+      const loreTitle = $('#loreTitle');
+      const loreAuthor = $('#loreAuthor');
+      const loreDesc = $('#loreDesc');
+      const loreTypeSelect = $('#loreType');
+      const loreSubmitBtn = $('#loreSubmitBtn');
+      const loreError = $('#loreError');
+      const loreSuccess = $('#loreSuccess');
 
-    function showPanel(panelId) {
-      allPanels.forEach(id => { const panel = panelElements[id]; if (panel) panel.classList.toggle('active', id === panelId); });
-      tabButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.tab === panelId));
-      membersTabBtn.classList.toggle('active', panelId === 'members');
-      if (panelId === 'members' && currentUser) loadMemberThreads();
-      if (panelId === 'gallery') loadGallery();
-      if (panelId === 'library') loadLibrary();
-    }
+      const toastContainer = $('#toastContainer');
 
-    function updateUIForLoggedIn() {
-      membersTabBtn.textContent = '🔒 Members Area';
-      membersTabBtn.classList.add('logged-in');
-      memberEmail.textContent = currentUser.email;
-      memberContent.style.display = 'block';
-      memberLoginPrompt.style.display = 'none';
-      showPanel('members');
-    }
-
-    function updateUIForLoggedOut() {
-      membersTabBtn.textContent = '🔒 Members-Only';
-      membersTabBtn.classList.remove('logged-in');
-      memberContent.style.display = 'none';
-      memberLoginPrompt.style.display = 'block';
-      showPanel('home');
-    }
-
-    async function signIn(email, password) {
-      authSubmit.disabled = true; authError.textContent = '';
-      try {
-        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        currentUser = data.user; currentSession = data.session;
-        updateUIForLoggedIn();
-        updateAdminUI();
-        closeAuthModal();
-        loadThreads();
-        if (currentUser) loadMemberThreads();
-        alert('✅ Signed in successfully!');
-      } catch (err) { authError.textContent = '❌ ' + err.message; }
-      finally { authSubmit.disabled = false; }
-    }
-
-    async function signUp(email, password) {
-      authSubmit.disabled = true; authError.textContent = '';
-      try {
-        const { data, error } = await supabaseClient.auth.signUp({ email, password });
-        if (error) throw error;
-        if (data.user) {
-          alert('✅ Sign-up successful! Please check your email to confirm your account.');
-          isLoginMode = true; updateAuthForm();
-        }
-      } catch (err) { authError.textContent = '❌ ' + err.message; }
-      finally { authSubmit.disabled = false; }
-    }
-
-    async function signOut() {
-      const { error } = await supabaseClient.auth.signOut();
-      if (error) { alert('❌ Error signing out: ' + error.message); return; }
-      currentUser = null; currentSession = null;
-      updateUIForLoggedOut();
-      updateAdminUI();
-      loadThreads();
-      alert('✅ Signed out.');
-    }
-
-    function openAuthModal() {
-      authModal.classList.add('active');
-      authError.textContent = '';
-      authEmail.value = ''; authPassword.value = '';
-      isLoginMode = true; updateAuthForm();
-      authEmail.focus();
-    }
-    function closeAuthModal() { authModal.classList.remove('active'); }
-
-    function updateAuthForm() {
-      if (isLoginMode) {
-        authTitle.textContent = 'Sign In';
-        authSub.textContent = 'Enter your credentials to access members-only content.';
-        authSubmit.textContent = 'Sign In';
-        authSwitchText.textContent = "Don't have an account?";
-        authSwitchLink.textContent = 'Sign Up';
-      } else {
-        authTitle.textContent = 'Sign Up';
-        authSub.textContent = 'Create an account to access members-only content.';
-        authSubmit.textContent = 'Sign Up';
-        authSwitchText.textContent = 'Already have an account?';
-        authSwitchLink.textContent = 'Sign In';
-      }
-      authError.textContent = '';
-    }
-
-    authSwitchLink.addEventListener('click', () => { isLoginMode = !isLoginMode; updateAuthForm(); });
-    authClose.addEventListener('click', closeAuthModal);
-    authModal.addEventListener('click', (e) => { if (e.target === authModal) closeAuthModal(); });
-    authSubmit.addEventListener('click', async () => {
-      const email = authEmail.value.trim();
-      const password = authPassword.value.trim();
-      if (!email || !password) { authError.textContent = '❌ Please fill in all fields.'; return; }
-      if (password.length < 6) { authError.textContent = '❌ Password must be at least 6 characters.'; return; }
-      if (isLoginMode) await signIn(email, password);
-      else await signUp(email, password);
-    });
-    authPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') authSubmit.click(); });
-    authEmail.addEventListener('keydown', (e) => { if (e.key === 'Enter') authPassword.focus(); });
-    memberLoginLink.addEventListener('click', openAuthModal);
-
-    tabButtons.forEach(btn => {
-      btn.addEventListener('click', function() {
-        const tab = this.dataset.tab;
-        showPanel(tab);
-        membersTabBtn.classList.remove('active');
-        if (tab === 'gallery') loadGallery();
-        if (tab === 'library') loadLibrary();
-      });
-    });
-
-    membersTabBtn.addEventListener('click', () => {
-      if (currentUser) { showPanel('members'); loadMemberThreads(); }
-      else { openAuthModal(); }
-    });
-
-    adminToggleBtn.addEventListener('click', function() {
-      if (!isAdmin()) { alert('Admin access required.'); return; }
-      adminSettingsPanel.classList.toggle('visible');
-      if (adminSettingsPanel.classList.contains('visible')) updateAdminStats();
-    });
-
-    signoutBtn.addEventListener('click', signOut);
-
-    // ─── SESSION & STATS ──────────────────────────────────
-    async function updateActiveSession() {
-      const sessionId = getSessionId();
-      const { error } = await supabaseClient.from('active_sessions').upsert({ session_id: sessionId, last_active: new Date().toISOString() }, { onConflict: 'session_id' });
-      if (error) console.error('Active session error:', error);
-    }
-
-    async function updateStats() {
-      if (!sessionStorage.getItem('visit_counted')) {
-        const { data, error } = await supabaseClient.rpc('increment_total_visits');
-        if (!error && data) {
-          $('stat-total').textContent = data;
-          $('visitorCount').textContent = data;
-        }
-        sessionStorage.setItem('visit_counted', 'true');
-      } else {
-        const { data, error } = await supabaseClient.from('site_stats').select('total_visits').eq('id', 1).single();
-        if (!error && data) {
-          $('stat-total').textContent = data.total_visits;
-          $('visitorCount').textContent = data.total_visits;
-        }
-      }
-      const thirtySecondsAgo = new Date(Date.now() - 30000).toISOString();
-      const { count, error: countError } = await supabaseClient.from('active_sessions').select('*', { count: 'exact', head: true }).gt('last_active', thirtySecondsAgo);
-      if (!countError) { $('stat-online').textContent = count || 0; }
-    }
-
-    let heartbeatInterval = null;
-    function startHeartbeat() {
-      updateActiveSession();
-      heartbeatInterval = setInterval(() => { updateActiveSession(); updateStats(); }, 15000);
-    }
-
-    // ─── UPLOAD ──────────────────────────────────────────
-    async function uploadFile(file, folder = 'media') {
-      const fileName = `${Date.now()}_${file.name}`;
-      const filePath = `${folder}/${fileName}`;
-      const { data, error } = await supabaseClient.storage.from('images').upload(filePath, file);
-      if (error) { console.error('Upload error:', error); return null; }
-      const { data: publicUrlData } = supabaseClient.storage.from('images').getPublicUrl(filePath);
-      return publicUrlData.publicUrl;
-    }
-
-    // ─── VIEW TRACKING ──────────────────────────────────
-    async function registerView(threadId, type) {
-      const sessionKey = 'viewed_threads';
-      let viewed = JSON.parse(sessionStorage.getItem(sessionKey) || '[]');
-      if (viewed.includes(String(threadId))) return;
-      const fn = type === 'public' ? 'increment_public_thread_view' : 'increment_member_thread_view';
-      const { data, error } = await supabaseClient.rpc(fn, { thread_id: parseInt(threadId) });
-      if (!error && data !== null) {
-        viewed.push(String(threadId));
-        sessionStorage.setItem(sessionKey, JSON.stringify(viewed));
-        const viewSpan = document.querySelector(`.thread-card[data-thread-id="${threadId}"] .view-count`);
-        if (viewSpan) viewSpan.textContent = data;
-        const memberViewSpan = document.querySelector(`.member-thread[data-thread-id="${threadId}"] .view-count`);
-        if (memberViewSpan) memberViewSpan.textContent = data;
-      }
-    }
-
-    // ─── GALLERY & LIBRARY ────────────────────────────
-    async function loadGallery() {
-      const grid = $('galleryGrid');
-      grid.innerHTML = `<p style="color:#7a82a0; grid-column:1/-1; text-align:center;">Loading images...</p>`;
-      const { data: threads, error } = await supabaseClient.from('threads').select('image_url, id, title').not('image_url', 'is', null).order('created_at', { ascending: false });
-      if (error) { grid.innerHTML = `<p style="color:#f43f5e; grid-column:1/-1;">❌ Error: ${error.message}</p>`; return; }
-      if (!threads || threads.length === 0) { grid.innerHTML = `<p style="color:#7a82a0; grid-column:1/-1; text-align:center;">No images found.</p>`; return; }
-      let html = '';
-      threads.forEach(t => {
-        const caption = t.title ? `Image from: ${sanitizeInput(t.title)}` : '';
-        html += `<div class="gallery-item" onclick="openFullscreen('${t.image_url}', '${sanitizeInput(caption)}')"><img src="${t.image_url}" alt="${sanitizeInput(t.title || 'Image')}" loading="lazy" /></div>`;
-      });
-      grid.innerHTML = html;
-    }
-
-    async function loadLibrary() {
-      const container = $('libraryContainer');
-      container.innerHTML = `<p style="color:#7a82a0;">Loading productivity threads...</p>`;
-      const { data: threads, error } = await supabaseClient.from('threads').select('id, title, content, author_name, created_at, tag').eq('tag', 'Productivity').order('created_at', { ascending: false });
-      if (error) { container.innerHTML = `<p style="color:#f43f5e;">❌ Error: ${error.message}</p>`; return; }
-      if (!threads || threads.length === 0) { container.innerHTML = `<p style="color:#7a82a0;">No productivity threads yet. Start one in Home!</p>`; return; }
-      let html = '';
-      threads.forEach(t => {
-        const safeTitle = sanitizeInput(t.title);
-        const safeContent = sanitizeInput(t.content || '').substring(0, 150);
-        const author = sanitizeInput(t.author_name || 'Anonymous');
-        const date = new Date(t.created_at).toLocaleString();
-        html += `<div class="library-item" style="background:rgba(255,255,255,0.02); border-radius:12px; padding:0.8rem 1.2rem; margin-bottom:0.8rem; border-left:3px solid #2dd4bf;">
-          <h3 style="font-size:1rem; margin-bottom:0.2rem; color:#e4e6eb;">${safeTitle}</h3>
-          <div style="font-size:0.85rem; color:#b0b8c8; line-height:1.4;">${safeContent}${t.content && t.content.length > 150 ? '...' : ''}</div>
-          <div style="font-size:0.7rem; color:#7a82a0; margin-top:0.3rem;">By ${author} · ${date}</div>
-        </div>`;
-      });
-      container.innerHTML = html;
-    }
-
-    // ─── FULLSCREEN ──────────────────────────────────────
-    const fsOverlay = $('fullscreenOverlay');
-    const fsImage = $('fullscreenImage');
-    const fsCaption = $('fullscreenCaption');
-    const fsClose = $('fullscreenClose');
-
-    function openFullscreen(imgSrc, caption = '') {
-      fsImage.src = imgSrc;
-      fsCaption.textContent = caption;
-      fsOverlay.classList.add('active');
-      document.body.style.overflow = 'hidden';
-    }
-
-    function closeFullscreen() {
-      fsOverlay.classList.remove('active');
-      document.body.style.overflow = '';
-    }
-
-    fsClose.addEventListener('click', closeFullscreen);
-    fsOverlay.addEventListener('click', function(e) { if (e.target === this) closeFullscreen(); });
-    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeFullscreen(); });
-
-    // ─── EDIT / DELETE (public) ──────────────────────────
-    window.editThread = function(threadId) {
-      const card = document.querySelector(`.thread-card[data-thread-id="${threadId}"]`);
-      if (!card) return;
-      const titleEl = card.querySelector('h2');
-      const contentEl = card.querySelector('.content');
-      const actionsEl = card.querySelector('.actions');
-      const editBtn = actionsEl.querySelector('.edit-btn');
-      if (!editBtn) return;
-      if (editBtn.dataset.editing === 'true') { loadThreads(); return; }
-      const currentTitle = titleEl.textContent;
-      const currentContent = contentEl.textContent;
-      titleEl.innerHTML = `<input type="text" id="edit-title-${threadId}" value="${currentTitle}" style="width:100%; background:#0f1426; border:1px solid #2a2f4b; border-radius:8px; color:#e4e6eb; padding:0.5rem; font-size:1.1rem;">`;
-      contentEl.innerHTML = `<textarea id="edit-content-${threadId}" style="width:100%; min-height:80px; background:#0f1426; border:1px solid #2a2f4b; border-radius:8px; color:#e4e6eb; padding:0.5rem;">${currentContent}</textarea>
-        <div style="margin-top:0.5rem;"><button class="save-btn" onclick="saveThreadEdit('${threadId}')">Save</button><button class="cancel-btn" onclick="loadThreads()">Cancel</button></div>`;
-      editBtn.dataset.editing = 'true';
-      editBtn.innerHTML = '<i class="fas fa-times"></i>';
-    };
-
-    window.saveThreadEdit = async function(threadId) {
-      const titleInput = document.getElementById(`edit-title-${threadId}`);
-      const contentInput = document.getElementById(`edit-content-${threadId}`);
-      const title = titleInput.value.trim();
-      const content = contentInput.value.trim();
-      if (!title) { alert('Title cannot be empty.'); return; }
-      const { error } = await supabaseClient.from('threads').update({ title, content }).eq('id', threadId);
-      if (error) { alert('❌ Error updating: ' + error.message); return; }
-      loadThreads();
-    };
-
-    window.deleteThread = async function(threadId) {
-      if (!confirm('Delete this thread and all its replies?')) return;
-      const { error } = await supabaseClient.from('threads').delete().eq('id', threadId);
-      if (error) { alert('❌ Error deleting: ' + error.message); return; }
-      loadThreads();
-    };
-
-    window.editPost = function(threadId, postId) {
-      const replyItem = document.querySelector(`.reply-item[data-post-id="${postId}"]`);
-      if (!replyItem) return;
-      const contentEl = replyItem.querySelector('.content');
-      const actionsEl = replyItem.querySelector('.actions');
-      const editBtn = actionsEl.querySelector('.edit-btn');
-      if (!editBtn) return;
-      if (editBtn.dataset.editing === 'true') { viewThread(threadId); return; }
-      const currentContent = contentEl.textContent;
-      contentEl.innerHTML = `<textarea id="edit-post-${postId}" style="width:100%; min-height:60px; background:#0f1426; border:1px solid #2a2f4b; border-radius:8px; color:#e4e6eb; padding:0.5rem;">${currentContent}</textarea>
-        <div style="margin-top:0.3rem;"><button class="save-btn" onclick="savePostEdit('${threadId}','${postId}')">Save</button><button class="cancel-btn" onclick="viewThread('${threadId}')">Cancel</button></div>`;
-      editBtn.dataset.editing = 'true';
-      editBtn.innerHTML = '<i class="fas fa-times"></i>';
-    };
-
-    window.savePostEdit = async function(threadId, postId) {
-      const contentInput = document.getElementById(`edit-post-${postId}`);
-      const content = contentInput.value.trim();
-      if (!content) { alert('Content cannot be empty.'); return; }
-      const { error } = await supabaseClient.from('posts').update({ content }).eq('id', postId);
-      if (error) { alert('❌ Error updating: ' + error.message); return; }
-      viewThread(threadId);
-      loadThreads();
-    };
-
-    window.deletePost = async function(threadId, postId) {
-      if (!confirm('Delete this reply?')) return;
-      const { error } = await supabaseClient.from('posts').delete().eq('id', postId);
-      if (error) { alert('❌ Error deleting: ' + error.message); return; }
-      viewThread(threadId);
-      loadThreads();
-    };
-
-    // ─── EDIT / DELETE (member) ──────────────────────────
-    window.editMemberThread = function(threadId) {
-      const card = document.querySelector(`.member-thread[data-thread-id="${threadId}"]`);
-      if (!card) return;
-      const titleEl = card.querySelector('h3');
-      const contentEl = card.querySelector('.content');
-      const actionsEl = card.querySelector('.actions');
-      const editBtn = actionsEl.querySelector('.edit-btn');
-      if (!editBtn) return;
-      if (editBtn.dataset.editing === 'true') { loadMemberThreads(); return; }
-      const currentTitle = titleEl.textContent;
-      const currentContent = contentEl.textContent;
-      titleEl.innerHTML = `<input type="text" id="edit-member-title-${threadId}" value="${currentTitle}" style="width:100%; background:#0f1426; border:1px solid #2a2f4b; border-radius:8px; color:#e4e6eb; padding:0.5rem; font-size:1.05rem;">`;
-      contentEl.innerHTML = `<textarea id="edit-member-content-${threadId}" style="width:100%; min-height:80px; background:#0f1426; border:1px solid #2a2f4b; border-radius:8px; color:#e4e6eb; padding:0.5rem;">${currentContent}</textarea>
-        <div style="margin-top:0.5rem;"><button class="save-btn" onclick="saveMemberThreadEdit('${threadId}')">Save</button><button class="cancel-btn" onclick="loadMemberThreads()">Cancel</button></div>`;
-      editBtn.dataset.editing = 'true';
-      editBtn.innerHTML = '<i class="fas fa-times"></i>';
-    };
-
-    window.saveMemberThreadEdit = async function(threadId) {
-      const titleInput = document.getElementById(`edit-member-title-${threadId}`);
-      const contentInput = document.getElementById(`edit-member-content-${threadId}`);
-      const title = titleInput.value.trim();
-      const content = contentInput.value.trim();
-      if (!title) { alert('Title cannot be empty.'); return; }
-      const { error } = await supabaseClient.from('member_threads').update({ title, content }).eq('id', threadId);
-      if (error) { alert('❌ Error updating: ' + error.message); return; }
-      loadMemberThreads();
-    };
-
-    window.deleteMemberThread = async function(threadId) {
-      if (!confirm('Delete this member thread and its replies?')) return;
-      const { error } = await supabaseClient.from('member_threads').delete().eq('id', threadId);
-      if (error) { alert('❌ Error deleting: ' + error.message); return; }
-      loadMemberThreads();
-    };
-
-    window.editMemberPost = function(threadId, postId) {
-      const replyItem = document.querySelector(`.member-reply[data-post-id="${postId}"]`);
-      if (!replyItem) return;
-      const contentEl = replyItem.querySelector('.content');
-      const actionsEl = replyItem.querySelector('.actions');
-      const editBtn = actionsEl.querySelector('.edit-btn');
-      if (!editBtn) return;
-      if (editBtn.dataset.editing === 'true') { viewMemberThread(threadId); return; }
-      const currentContent = contentEl.textContent;
-      contentEl.innerHTML = `<textarea id="edit-member-post-${postId}" style="width:100%; min-height:60px; background:#0f1426; border:1px solid #2a2f4b; border-radius:8px; color:#e4e6eb; padding:0.5rem;">${currentContent}</textarea>
-        <div style="margin-top:0.3rem;"><button class="save-btn" onclick="saveMemberPostEdit('${threadId}','${postId}')">Save</button><button class="cancel-btn" onclick="viewMemberThread('${threadId}')">Cancel</button></div>`;
-      editBtn.dataset.editing = 'true';
-      editBtn.innerHTML = '<i class="fas fa-times"></i>';
-    };
-
-    window.saveMemberPostEdit = async function(threadId, postId) {
-      const contentInput = document.getElementById(`edit-member-post-${postId}`);
-      const content = contentInput.value.trim();
-      if (!content) { alert('Content cannot be empty.'); return; }
-      const { error } = await supabaseClient.from('member_posts').update({ content }).eq('id', postId);
-      if (error) { alert('❌ Error updating: ' + error.message); return; }
-      viewMemberThread(threadId);
-      loadMemberThreads();
-    };
-
-    window.deleteMemberPost = async function(threadId, postId) {
-      if (!confirm('Delete this reply?')) return;
-      const { error } = await supabaseClient.from('member_posts').delete().eq('id', postId);
-      if (error) { alert('❌ Error deleting: ' + error.message); return; }
-      viewMemberThread(threadId);
-      loadMemberThreads();
-    };
-
-    // ─── LOAD PUBLIC THREADS (BATCHED & FAST) ──────────
-    async function loadThreads() {
-      // Show skeletons
-      container.innerHTML = `
-        <div class="skeleton-thread"><div class="line long"></div><div class="line medium"></div><div class="line short"></div></div>
-        <div class="skeleton-thread"><div class="line long"></div><div class="line medium"></div><div class="line short"></div></div>
-        <div class="skeleton-thread"><div class="line long"></div><div class="line medium"></div><div class="line short"></div></div>
-      `;
-
-      const tagFilter = $('publicTagFilter').value;
-      let query = supabaseClient.from('threads').select('*').order('created_at', { ascending: false });
-      if (tagFilter !== 'all') query = query.eq('tag', tagFilter);
-      const { data: threads, error } = await query;
-
-      if (error) {
-        container.innerHTML = `<div class="thread-card" style="border-color:#f43f5e;"><p>❌ Error: ${error.message}</p></div>`;
-        return;
+      // ─── HELPERS ──────────────────────────────────────────────
+      function toast(msg, type = 'info') {
+        const el = document.createElement('div');
+        el.className = `toast ${type}`;
+        el.textContent = msg;
+        toastContainer.appendChild(el);
+        setTimeout(() => {
+          el.style.opacity = '0';
+          el.style.transform = 'translateX(30px)';
+          setTimeout(() => el.remove(), 300);
+        }, 3400);
       }
 
-      threadCache = threads || [];
-      $('stat-threads').textContent = threadCache.length;
+      function openModal(modal) { modal.classList.add('active'); document.body.style.overflow = 'hidden'; }
+      function closeModal(modal) { modal.classList.remove('active'); document.body.style.overflow = ''; }
 
-      // BATCH: get reply counts for all threads in one query
-      let replyCounts = {};
-      let likeCounts = {};
-      let userLikes = {};
+      function getRoleLabel(r) {
+        if (r === 'admin') return 'Admin';
+        if (r === 'subscriber') return 'Subscriber';
+        if (r === 'member') return 'Member';
+        return 'Guest';
+      }
 
-      if (threadCache.length > 0) {
-        const threadIds = threadCache.map(t => t.id);
-        // Reply counts
-        const { data: repliesData, error: repliesError } = await supabaseClient
-          .from('posts')
-          .select('thread_id', { count: 'exact' })
-          .in('thread_id', threadIds);
-        if (!repliesError) {
-          // Count manually
-          const counts = {};
-          repliesData.forEach(r => { counts[r.thread_id] = (counts[r.thread_id] || 0) + 1; });
-          replyCounts = counts;
-        } else {
-          console.error('Reply count error:', repliesError);
-        }
+      function isPaidPrice(price) {
+        if (!price) return false;
+        const p = price.trim().toLowerCase();
+        if (p === '' || p === '0' || p === '0.00' || p === 'free' || p === 'free download') return false;
+        return true;
+      }
 
-        // Like counts
-        const { data: likesData, error: likesError } = await supabaseClient
-          .from('likes')
-          .select('thread_id')
-          .in('thread_id', threadIds);
-        if (!likesError) {
-          const counts = {};
-          likesData.forEach(l => { counts[l.thread_id] = (counts[l.thread_id] || 0) + 1; });
-          likeCounts = counts;
-        } else {
-          console.error('Like count error:', likesError);
-        }
-
-        // User's likes (if logged in)
-        const userName = getUserName();
-        if (userName !== 'Anonymous') {
-          const { data: userLikesData, error: userLikesError } = await supabaseClient
-            .from('likes')
-            .select('thread_id')
-            .in('thread_id', threadIds)
-            .eq('user_name', userName);
-          if (!userLikesError) {
-            userLikesData.forEach(l => { userLikes[l.thread_id] = true; });
-          }
+      // ─── AUTH ──────────────────────────────────────────────────
+      async function signUp(email, password, username) {
+        try {
+          const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: { data: { username } }
+          });
+          if (error) throw error;
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert([{ id: data.user.id, username, role: 'member' }]);
+          if (profileError) throw profileError;
+          toast('Account created! Please sign in.', 'success');
+          return true;
+        } catch (err) {
+          toast(err.message, 'error');
+          return false;
         }
       }
 
-      // Total replies (for stats)
-      let totalReplies = 0;
-      for (const tid in replyCounts) totalReplies += replyCounts[tid];
-      $('stat-replies').textContent = totalReplies;
-
-      if (!threadCache.length) {
-        container.innerHTML = `<div class="thread-card"><p class="text-muted">No threads with this tag. Start one above!</p></div>`;
-        return;
-      }
-
-      const userName = getUserName();
-      const admin = isAdmin();
-
-      const fragment = document.createDocumentFragment();
-      const tempDiv = document.createElement('div');
-
-      for (const t of threadCache) {
-        const likeCount = likeCounts[t.id] || 0;
-        const userLike = userLikes[t.id] || false;
-        const replyCount = replyCounts[t.id] || 0;
-
-        const userInfo = getUserDisplay(t.author_name || '');
-        const displayName = userInfo.displayName;
-        const roleClass = userInfo.role === 'admin' ? 'admin-post' : userInfo.role === 'mod' ? 'mod-post' : userInfo.role === 'unverified' ? 'unverified-post' : '';
-        const badgeHtml = userInfo.badge;
-        const tagBadge = t.tag ? `<span class="tag-badge">${sanitizeInput(t.tag)}</span>` : '';
-        const lockIcon = t.password_hash ? `<i class="fas fa-lock lock-icon" title="Password protected"></i>` : '';
-        const ageIcon = t.age_required && t.age_required > 0 ? `<i class="fas fa-shield-alt age-icon" title="Age ${t.age_required}+"></i>` : '';
-
-        let mediaHtml = '';
-        const mediaType = t.media_type || 'image';
-        const mediaUrl = t.image_url;
-        if (mediaUrl) {
-          if (mediaType === 'video') {
-            mediaHtml = `<div class="media-wrapper"><video controls src="${mediaUrl}" style="max-height:400px; width:100%; border-radius:12px; background:#000;"></video></div>`;
-          } else if (mediaType === 'file') {
-            const fileName = mediaUrl.split('/').pop();
-            mediaHtml = `<div class="media-wrapper"><a href="${mediaUrl}" target="_blank" download class="file-download"><i class="fas fa-download"></i> ${fileName}</a></div>`;
+      async function signIn(email, password) {
+        try {
+          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+          if (error) throw error;
+          const { data: profile, error: pErr } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', data.user.id)
+            .maybeSingle();
+          if (pErr) throw pErr;
+          if (profile) {
+            currentUser = { ...data.user, ...profile };
           } else {
-            const blurredClass = t.blurred ? 'image-blur' : '';
-            const unblurred = localStorage.getItem(`unblurred_${t.id}`) === 'true' ? 'unblurred' : '';
-            const imgClass = `thread-image ${blurredClass} ${unblurred}`.trim();
-            mediaHtml = `<img src="${mediaUrl}" class="${imgClass}" alt="thread image" onclick="toggleBlur('${t.id}', this)" />`;
+            const { error: insertErr } = await supabase
+              .from('profiles')
+              .insert([{ id: data.user.id, username: data.user.email.split('@')[0], role: 'member' }]);
+            if (insertErr) throw insertErr;
+            const { data: newProfile, error: fetchErr } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', data.user.id)
+              .maybeSingle();
+            if (fetchErr) throw fetchErr;
+            currentUser = { ...data.user, ...newProfile };
+          }
+          isLoggedIn = true;
+          // 🔥 HARDCODED ADMIN CHECK
+          isAdmin = (currentUser.email === ADMIN_EMAIL);
+          toast(`Welcome, ${currentUser.username}!`, 'success');
+          updateUI();
+          return true;
+        } catch (err) {
+          toast(err.message, 'error');
+          return false;
+        }
+      }
+
+      async function signOut() {
+        await supabase.auth.signOut();
+        currentUser = null;
+        isLoggedIn = false;
+        isAdmin = false;
+        toast('Logged out.', 'info');
+        updateUI();
+      }
+
+      // ─── BULLETPROOF VIEW INCREMENT ──────────────────────────
+      async function incrementArtView(artId) {
+        try {
+          const { data, error } = await supabase.rpc('increment_art_view', { art_id: artId });
+          if (error) throw error;
+          const art = galleryData.find(a => a.id === artId);
+          if (art) { art.views = data; }
+          return data;
+        } catch (err) {
+          console.warn('Art view increment failed:', err);
+          try {
+            const { data: fetchData } = await supabase
+              .from('fusion_art')
+              .select('views')
+              .eq('id', artId)
+              .maybeSingle();
+            const newViews = (fetchData?.views || 0) + 1;
+            const { error: updateErr } = await supabase
+              .from('fusion_art')
+              .update({ views: newViews })
+              .eq('id', artId);
+            if (updateErr) throw updateErr;
+            const art = galleryData.find(a => a.id === artId);
+            if (art) { art.views = newViews; }
+            return newViews;
+          } catch (fallbackErr) {
+            console.warn('Fallback increment also failed:', fallbackErr);
+            return 0;
           }
         }
+      }
 
-        let lockHtml = '', passwordVerified = false;
-        if (t.password_hash) {
-          const unlocked = localStorage.getItem(`unlocked_${t.id}`) === 'true';
-          if (!unlocked) {
-            lockHtml = `<div class="lock-overlay"><p><i class="fas fa-lock"></i> This post is password protected.</p><input type="password" id="pwd-input-${t.id}" placeholder="Enter password" /><button onclick="unlockThread('${t.id}')">Unlock</button><span id="pwd-error-${t.id}" style="color:#f43f5e; display:block;"></span></div>`;
-          } else { passwordVerified = true; }
+      async function incrementLoreView(loreId, type) {
+        try {
+          let rpcName = '';
+          if (type === 'public') rpcName = 'increment_public_lore_view';
+          else if (type === 'member') rpcName = 'increment_member_lore_view';
+          else if (type === 'subscriber') rpcName = 'increment_thread_view';
+          else return;
+          const { data, error } = await supabase.rpc(rpcName, { lore_id: loreId });
+          if (error) throw error;
+          return data;
+        } catch (err) {
+          console.warn('Lore view increment failed:', err);
+          try {
+            let table = '';
+            if (type === 'public') table = 'public_lore';
+            else if (type === 'member') table = 'member_lore';
+            else if (type === 'subscriber') table = 'threads';
+            else return;
+            const { data: fetchData } = await supabase
+              .from(table)
+              .select('views')
+              .eq('id', loreId)
+              .maybeSingle();
+            const newViews = (fetchData?.views || 0) + 1;
+            await supabase
+              .from(table)
+              .update({ views: newViews })
+              .eq('id', loreId);
+            return newViews;
+          } catch (fallbackErr) {
+            console.warn('Fallback lore increment failed:', fallbackErr);
+            return 0;
+          }
         }
+      }
 
-        let ageHtml = '', ageVerified = false;
-        if (t.age_required && t.age_required > 0) {
-          const ageOk = localStorage.getItem(`age_verified_${t.id}`) === 'true';
-          if (!ageOk) {
-            ageHtml = `<div class="age-overlay"><p><i class="fas fa-shield-alt"></i> This post requires age ${t.age_required}+.</p><input type="number" id="age-input-${t.id}" placeholder="Enter your age" /><button onclick="verifyAge('${t.id}', ${t.age_required})">Verify</button><span id="age-error-${t.id}" style="color:#f43f5e; display:block;"></span></div>`;
-          } else { ageVerified = true; }
+      async function incrementTotalVisits() {
+        try {
+          const { data, error } = await supabase.rpc('increment_total_visits');
+          if (error) throw error;
+          return data;
+        } catch (err) {
+          console.warn('Total visits increment failed:', err);
+          try {
+            const { data: fetchData } = await supabase
+              .from('site_stats')
+              .select('total_visits')
+              .eq('id', 1)
+              .maybeSingle();
+            const newVisits = (fetchData?.total_visits || 0) + 1;
+            await supabase
+              .from('site_stats')
+              .update({ total_visits: newVisits })
+              .eq('id', 1);
+            return newVisits;
+          } catch (fallbackErr) {
+            console.warn('Fallback total visits failed:', fallbackErr);
+            return 0;
+          }
         }
+      }
 
-        const showContent = (!t.password_hash || passwordVerified) && (!t.age_required || t.age_required === 0 || ageVerified);
+      // ─── FETCH DATA ───────────────────────────────────────────
+      async function fetchGallery() {
+        try {
+          const { data, error } = await supabase
+            .from('fusion_art')
+            .select('*')
+            .order('created_at', { ascending: false });
+          if (error) throw error;
+          galleryData = data || [];
+          galleryData.sort((a, b) => {
+            const aPaid = isPaidPrice(a.price), bPaid = isPaidPrice(b.price);
+            if (aPaid && !bPaid) return -1;
+            if (!aPaid && bPaid) return 1;
+            return 0;
+          });
+          renderGallery();
+        } catch (err) {
+          console.warn('Gallery fetch error:', err);
+          galleryData = [];
+          renderGallery();
+        }
+      }
 
-        const canEdit = admin;
-        const editBtns = canEdit ? `
-          <span class="edit-btn" onclick="editThread('${t.id}')" data-editing="false"><i class="fas fa-pen"></i></span>
-          <span class="delete-btn" onclick="deleteThread('${t.id}')"><i class="fas fa-trash"></i></span>
-          <span class="admin-label">Admin</span>
-        ` : '';
+      async function fetchLores() {
+        try {
+          const { data: publicLores, error: err1 } = await supabase
+            .from('public_lore')
+            .select('*')
+            .order('created_at', { ascending: false });
+          if (err1) throw err1;
+          const { data: memberLore, error: err2 } = await supabase
+            .from('member_lore')
+            .select('*')
+            .order('created_at', { ascending: false });
+          if (err2) throw err2;
+          const { data: subscriberThreads, error: err3 } = await supabase
+            .from('threads')
+            .select('*')
+            .eq('thread_type', 'subscriber')
+            .order('created_at', { ascending: false });
+          if (err3) throw err3;
+          publicLoresData = publicLores || [];
+          memberLoreData = memberLore || [];
+          subscriberLoresData = subscriberThreads || [];
+          renderLores();
+        } catch (err) {
+          console.warn('Lore fetch error:', err);
+          publicLoresData = [];
+          memberLoreData = [];
+          subscriberLoresData = [];
+          renderLores();
+        }
+      }
 
-        const cardHTML = `<div class="thread-card ${roleClass}" data-thread-id="${t.id}">
-          <div class="author">
-            <img src="${getAvatar(displayName === 'Unverified' ? '' : displayName)}" alt="" />
-            <span class="name">${sanitizeInput(displayName)} ${badgeHtml}</span>
-            ${tagBadge}
-            <span class="time">${new Date(t.created_at).toLocaleString()}</span>
-            ${lockIcon} ${ageIcon}
-          </div>
-          <h2>${sanitizeInput(t.title)}</h2>
-          ${showContent ? `<div class="content">${sanitizeInput(t.content || '')}</div>${mediaHtml}` : `<div class="content" style="opacity:0.3; filter: blur(4px); pointer-events:none;">${sanitizeInput((t.content||'').substring(0,100))}...</div>${mediaUrl ? `<div style="filter: blur(20px);">${mediaHtml}</div>` : ''}`}
-          ${!showContent ? lockHtml + ageHtml : ''}
-          <div class="actions">
-            <span class="like-toggle ${userLike ? 'liked' : ''}" data-thread="${t.id}" onclick="toggleLike('${t.id}')">
-              <i class="fas fa-heart"></i> <span class="like-count">${likeCount}</span>
-            </span>
-            <span><i class="fas fa-comment"></i> ${replyCount}</span>
-            <span><i class="fas fa-eye"></i> <span class="view-count">${t.views || 0}</span></span>
-            <span><i class="fas fa-share-alt"></i> Share</span>
-            ${editBtns}
-          </div>
-          <div id="replies-${t.id}" class="replies-container hidden"></div>
-          <button class="show-replies-btn" onclick="viewThread('${t.id}')">
-            <i class="fas fa-chevron-down"></i> Show replies
+      async function fetchStats() {
+        try {
+          const { data, error } = await supabase
+            .from('site_stats')
+            .select('*')
+            .eq('id', 1)
+            .maybeSingle();
+          if (error) throw error;
+          if (data) {
+            document.getElementById('statVisitors').textContent = data.total_visits || 0;
+            document.getElementById('statUsers').textContent = data.total_users || 0;
+            document.getElementById('statAdmins').textContent = data.total_admins || 0;
+            document.getElementById('statLores').textContent = data.total_threads || 0;
+            document.getElementById('statReplies').textContent = data.total_replies || 0;
+            document.getElementById('statArt').textContent = data.total_artworks || 0;
+            document.getElementById('statArtViews').textContent = data.total_art_views || 0;
+          }
+        } catch (err) {
+          console.warn('Stats fetch error:', err);
+        }
+      }
+
+      // ─── RENDER FUNCTIONS ─────────────────────────────────────
+      function renderNav() {
+        const createPostBtn = `
+          <button class="btn btn-gold btn-sm" id="createPostBtn" style="font-weight:700;">
+            <i class="fas fa-plus-circle"></i> Create Post
           </button>
-        </div>`;
+        `;
 
-        tempDiv.innerHTML = cardHTML;
-        fragment.appendChild(tempDiv.firstElementChild);
+        if (isLoggedIn && currentUser) {
+          const initial = currentUser.username ? currentUser.username.charAt(0).toUpperCase() : 'U';
+          const roleBadge = isAdmin ? 'badge-admin' : (currentUser.role === 'subscriber' ? 'badge-subscriber' : 'badge-member');
+          navLinks.innerHTML = `
+            ${createPostBtn}
+            <div class="user-info">
+              <div class="avatar">${initial}</div>
+              <span class="username">${currentUser.username || 'User'}</span>
+              <span class="badge ${roleBadge}" style="font-size:0.65rem;padding:2px 10px;">${getRoleLabel(currentUser.role)}</span>
+            </div>
+            <button class="btn btn-outline btn-sm" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+          `;
+          document.getElementById('logoutBtn')?.addEventListener('click', signOut);
+          document.getElementById('createPostBtn')?.addEventListener('click', () => {
+            if (isAdmin) {
+              openModal(adminModal);
+            } else {
+              toast('Admin access required to create posts.', 'error');
+            }
+          });
+        } else {
+          navLinks.innerHTML = `
+            ${createPostBtn}
+            <button class="btn btn-outline btn-sm" id="loginNavBtn"><i class="fas fa-sign-in-alt"></i> Sign In</button>
+            <button class="btn btn-primary btn-sm" id="signupNavBtn"><i class="fas fa-user-plus"></i> Sign Up</button>
+          `;
+          document.getElementById('loginNavBtn')?.addEventListener('click', () => openModal(loginModal));
+          document.getElementById('signupNavBtn')?.addEventListener('click', () => openModal(signupModal));
+          document.getElementById('createPostBtn')?.addEventListener('click', () => {
+            toast('Please sign in to create posts.', 'info');
+            openModal(loginModal);
+          });
+        }
+
+        // Admin FAB and "New Lore" buttons visibility
+        if (isAdmin) {
+          adminFab.classList.remove('hidden');
+          document.querySelectorAll('.new-lore-btn').forEach(btn => btn.style.display = 'inline-block');
+        } else {
+          adminFab.classList.add('hidden');
+          document.querySelectorAll('.new-lore-btn').forEach(btn => btn.style.display = 'none');
+        }
+        renderRequestForm();
       }
 
-      container.innerHTML = '';
-      container.appendChild(fragment);
+      function renderGallery() {
+        galleryGrid.innerHTML = '';
+        if (!galleryData.length) {
+          galleryGrid.innerHTML = '<p style="color:#8a92a8;text-align:center;grid-column:1/-1;">No fusion art yet. Admin can upload!</p>';
+          return;
+        }
+        let paidCount = 0, freeCount = 0;
+        galleryData.forEach(art => { if (isPaidPrice(art.price)) paidCount++; else freeCount++; });
+        let freeRendered = false;
 
-      if (admin) updateAdminStats();
+        galleryData.forEach((art) => {
+          const isPaid = isPaidPrice(art.price);
+          if (!isPaid && paidCount > 0 && !freeRendered) {
+            const div = document.createElement('div');
+            div.className = 'gallery-divider';
+            div.textContent = '✦ FREE DOWNLOADS';
+            div.style.cssText = 'grid-column:1/-1;display:flex;align-items:center;gap:16px;margin:20px 0 10px;color:#5a6278;font-size:0.9rem;letter-spacing:1px;';
+            div.innerHTML += '<span style="flex:1;height:1px;background:#1a1f3a;"></span>';
+            galleryGrid.appendChild(div);
+            freeRendered = true;
+          }
 
-      // Register views (once per session)
-      for (const t of threadCache) {
-        registerView(t.id, 'public');
-      }
-    }
+          const card = document.createElement('div');
+          card.className = 'art-card';
+          if (isPaid) card.classList.add('premium');
+          else card.classList.add('free');
+          if (art.subscriber_only) card.classList.add('subscriber-locked');
 
-    document.getElementById('publicTagFilter').addEventListener('change', function() {
-      clearTimeout(this._timeout);
-      this._timeout = setTimeout(loadThreads, 200);
-    });
+          const canEnlarge = isLoggedIn && (currentUser?.role === 'subscriber' || isAdmin || !art.subscriber_only);
+          const canDownload = isLoggedIn && currentUser?.role === 'subscriber' && !art.subscriber_only;
 
-    // ─── VIEW PUBLIC THREAD (replies) ──────────────────
-    window.viewThread = async function(threadId) {
-      const container = document.getElementById(`replies-${threadId}`);
-      if (!container) return;
-      if (container.classList.contains('hidden')) {
-        container.classList.remove('hidden');
-        const { data: posts, error } = await supabaseClient.from('posts').select('*').eq('thread_id', threadId).order('created_at', { ascending: true });
-        if (error) { container.innerHTML = `<p style="color:#f43f5e;">❌ Error: ${error.message}</p>`; return; }
-        const admin = isAdmin();
-        let html = '';
-        if (!posts || posts.length === 0) { html = '<p class="text-muted">No replies yet. Be the first!</p>'; }
-        else {
-          html = posts.map(p => {
-            const rawAuthor = p.author_name || '';
-            const userInfo = getUserDisplay(rawAuthor);
-            const displayName = userInfo.displayName;
-            const roleClass = userInfo.role === 'admin' ? 'admin-post' : userInfo.role === 'mod' ? 'mod-post' : userInfo.role === 'unverified' ? 'unverified-post' : '';
-            const badgeHtml = userInfo.badge;
-            const safeContent = sanitizeInput(p.content);
-            let mediaHtml = '';
-            const mediaType = p.media_type || 'image';
-            const mediaUrl = p.image_url;
-            if (mediaUrl) {
-              if (mediaType === 'video') {
-                mediaHtml = `<video controls src="${mediaUrl}" class="reply-video"></video>`;
-              } else if (mediaType === 'file') {
-                const fileName = mediaUrl.split('/').pop();
-                mediaHtml = `<a href="${mediaUrl}" target="_blank" download class="reply-file"><i class="fas fa-download"></i> ${fileName}</a>`;
-              } else {
-                mediaHtml = `<img src="${mediaUrl}" class="reply-image" alt="reply image" />`;
+          let lockHtml = '';
+          if (!canEnlarge) {
+            let lockMessage = 'Sign in to view';
+            if (art.subscriber_only && isLoggedIn && currentUser?.role === 'member') lockMessage = '🔒 Subscriber Only';
+            else if (art.subscriber_only && !isLoggedIn) lockMessage = '🔒 Subscribe to unlock';
+            lockHtml = `<div class="lock-overlay" style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;gap:8px;opacity:0;transition:opacity 0.3s ease;pointer-events:none;"><i class="fas fa-lock" style="font-size:2.4rem;color:#ff6bff;"></i><span>${lockMessage}</span></div>`;
+          }
+
+          const priceDisplay = art.price && art.price.trim() !== '' ? art.price : 'Free';
+          const priceClass = isPaid ? 'price' : 'price free';
+          const thumbSrc = art.thumbnail_url && art.thumbnail_url.trim() !== '' ? art.thumbnail_url : art.image_url;
+          const views = art.views || 0;
+
+          card.innerHTML = `
+            <div class="img-wrap" data-artid="${art.id}" style="cursor:pointer;">
+              <img src="${thumbSrc}" alt="${art.title}" loading="lazy" />
+              ${lockHtml}
+            </div>
+            <div class="art-info">
+              <h3>${art.title}</h3>
+              <div class="artist">${art.artist}</div>
+              <div class="${priceClass}">${priceDisplay}</div>
+              ${art.subscriber_only ? '<div class="badge badge-subscriber-only" style="margin:4px 0;"><i class="fas fa-crown"></i> Subscriber Only</div>' : ''}
+              <div class="views"><i class="fas fa-eye"></i> ${views} view${views !== 1 ? 's' : ''}</div>
+              <div class="actions">
+                <button class="btn btn-primary view-btn" data-artid="${art.id}" ${!canEnlarge ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}><i class="fas fa-expand"></i> View</button>
+                ${canDownload ? `<button class="btn btn-gold download-btn" data-artid="${art.id}"><i class="fas fa-download"></i> DL</button>` :
+                `<button class="btn btn-outline" disabled style="opacity:0.35;cursor:not-allowed;"><i class="fas fa-lock"></i> DL</button>`}
+                ${isAdmin ? `<button class="btn btn-outline edit-btn" data-artid="${art.id}" style="flex:0.5;"><i class="fas fa-edit"></i></button>` : ''}
+              </div>
+            </div>
+          `;
+          galleryGrid.appendChild(card);
+
+          const viewBtn = card.querySelector('.view-btn');
+          const downloadBtn = card.querySelector('.download-btn');
+          const imgWrap = card.querySelector('.img-wrap');
+          const editBtn = card.querySelector('.edit-btn');
+
+          const handleViewClick = async (e) => {
+            e.stopPropagation();
+            await incrementArtView(art.id);
+            renderGallery();
+            if (canEnlarge) {
+              openLightbox(art);
+            } else {
+              if (!isLoggedIn) {
+                toast('Please sign in to view full-size.', 'info');
+                openModal(loginModal);
+              } else if (art.subscriber_only && currentUser?.role === 'member') {
+                toast('This artwork is for subscribers only.', 'error');
               }
             }
-            const canEdit = admin;
-            const editBtns = canEdit ? `
-              <span class="edit-btn" onclick="editPost('${threadId}','${p.id}')" data-editing="false"><i class="fas fa-pen"></i></span>
-              <span class="delete-btn" onclick="deletePost('${threadId}','${p.id}')"><i class="fas fa-trash"></i></span>
-              <span class="admin-label">Admin</span>
-            ` : '';
-            return `<div class="reply-item ${roleClass}" data-post-id="${p.id}">
-              <div class="author">
-                <img src="${getAvatar(displayName === 'Unverified' ? '' : displayName)}" alt="" />
-                <span class="name">${sanitizeInput(displayName)} ${badgeHtml}</span>
-                <span class="time">${new Date(p.created_at).toLocaleString()}</span>
-              </div>
-              <div class="content">${safeContent}</div>
-              ${mediaHtml}
-              <div class="actions">${editBtns}</div>
-            </div>`;
-          }).join('');
-        }
-        html += `<div class="reply-form">
-          <input type="text" id="reply-author-${threadId}" placeholder="Your name" />
-          <textarea id="reply-content-${threadId}" placeholder="Write a reply..." rows="2"></textarea>
-          <div class="file-input-wrapper">
-            <input type="file" id="reply-image-${threadId}" accept="image/*" />
-            <label for="reply-image-${threadId}" style="font-size:0.75rem;"><i class="fas fa-image"></i> Add image</label>
-            <img id="reply-image-preview-${threadId}" class="preview" />
-            <span class="filename" id="reply-image-filename-${threadId}"></span>
-          </div>
-          <div class="file-input-wrapper">
-            <input type="file" id="reply-media-${threadId}" accept="video/*,.zip,.rar,.7z,.pdf,.doc,.docx,.txt" />
-            <label for="reply-media-${threadId}" style="font-size:0.75rem;"><i class="fas fa-video"></i> Add video/file</label>
-            <span class="filename" id="reply-media-filename-${threadId}"></span>
-          </div>
-          <button onclick="addReply('${threadId}')"><i class="fas fa-reply"></i> Reply</button>
-          <span id="reply-status-${threadId}" class="status-msg" style="display:none;"></span>
-        </div>`;
-        container.innerHTML = html;
-        // Attach preview handlers
-        const replyImageInput = document.getElementById(`reply-image-${threadId}`);
-        if (replyImageInput) {
-          replyImageInput.addEventListener('change', function(e) {
-            const preview = document.getElementById(`reply-image-preview-${threadId}`);
-            const filenameSpan = document.getElementById(`reply-image-filename-${threadId}`);
-            if (this.files && this.files[0]) {
-              const reader = new FileReader();
-              reader.onload = function(ev) { if (preview) { preview.src = ev.target.result; preview.style.display = 'block'; } };
-              reader.readAsDataURL(this.files[0]);
-              if (filenameSpan) filenameSpan.textContent = this.files[0].name;
-            } else {
-              if (preview) { preview.style.display = 'none'; preview.src = ''; }
-              if (filenameSpan) filenameSpan.textContent = '';
-            }
-          });
-        }
-        const replyMediaInput = document.getElementById(`reply-media-${threadId}`);
-        if (replyMediaInput) {
-          replyMediaInput.addEventListener('change', function(e) {
-            const filenameSpan = document.getElementById(`reply-media-filename-${threadId}`);
-            if (this.files && this.files[0]) {
-              if (filenameSpan) filenameSpan.textContent = this.files[0].name;
-            } else {
-              if (filenameSpan) filenameSpan.textContent = '';
-            }
-          });
-        }
-        setTimeout(() => container.scrollTop = container.scrollHeight, 100);
-      } else { container.classList.add('hidden'); }
-    };
+          };
 
-    // ─── ADD REPLY (public) ──────────────────────────────
-    window.addReply = async function(threadId) {
-      const authorInput = document.getElementById(`reply-author-${threadId}`);
-      const contentInput = document.getElementById(`reply-content-${threadId}`);
-      const imageInput = document.getElementById(`reply-image-${threadId}`);
-      const mediaInput = document.getElementById(`reply-media-${threadId}`);
-      const statusEl = document.getElementById(`reply-status-${threadId}`);
-      const btn = document.querySelector(`#replies-${threadId} .reply-form button`);
+          if (viewBtn) viewBtn.addEventListener('click', handleViewClick);
+          if (imgWrap) imgWrap.addEventListener('click', handleViewClick);
 
-      const rawAuthor = authorInput.value.trim();
-      const rawContent = contentInput.value.trim();
-      if (!rawContent) { alert('Write something.'); return; }
-
-      const author = rawAuthor || 'Anonymous';
-      const content = sanitizeInput(rawContent);
-      const sessionId = getSessionId();
-
-      btn.disabled = true;
-      setStatus(statusEl, 'Sending...', 'sending');
-
-      let imageUrl = null;
-      let mediaType = 'image';
-      let fileToUpload = null;
-      let fileType = '';
-      if (mediaInput && mediaInput.files && mediaInput.files[0]) {
-        fileToUpload = mediaInput.files[0];
-        const mime = fileToUpload.type;
-        if (mime.startsWith('video/')) { fileType = 'video'; } else { fileType = 'file'; }
-      } else if (imageInput && imageInput.files && imageInput.files[0]) {
-        fileToUpload = imageInput.files[0];
-        fileType = 'image';
+          if (downloadBtn && canDownload) {
+            downloadBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              downloadImage(art);
+            });
+          }
+          if (editBtn) {
+            editBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              if (confirm('Toggle subscriber-only status for this artwork?')) {
+                supabase
+                  .from('fusion_art')
+                  .update({ subscriber_only: !art.subscriber_only })
+                  .eq('id', art.id)
+                  .then(() => { fetchGallery(); });
+              }
+            });
+          }
+        });
       }
 
-      if (fileToUpload) {
-        const folder = fileType === 'image' ? 'images' : 'media';
-        imageUrl = await uploadFile(fileToUpload, folder);
-        if (!imageUrl) { setStatus(statusEl, 'File upload failed', 'error'); btn.disabled = false; return; }
-        mediaType = fileType;
+      function renderLores() {
+        publicLoresEl.innerHTML = '';
+        (publicLoresData || []).forEach(t => {
+          const card = document.createElement('div');
+          card.className = 'lore-card';
+          card.innerHTML = `
+            <h4>${t.title}</h4>
+            <p>${t.description}</p>
+            <div class="lore-meta">
+              <span>by ${t.author} · ${t.replies || 0} replies</span>
+              <span class="tag">📁 ROM Hacks</span>
+            </div>
+            <div class="lore-views"><i class="fas fa-eye"></i> ${t.views || 0}</div>
+          `;
+          publicLoresEl.appendChild(card);
+          card.addEventListener('click', async () => {
+            await incrementLoreView(t.id, 'public');
+            renderLores();
+          });
+        });
+
+        memberLoresEl.innerHTML = '';
+        (memberLoreData || []).forEach(t => {
+          const card = document.createElement('div');
+          card.className = 'lore-card';
+          if (!isLoggedIn) card.classList.add('locked-lore');
+          card.innerHTML = `
+            <h4>${t.title}</h4>
+            <p>${t.description}</p>
+            <div class="lore-meta">
+              <span>by ${t.author} · ${t.replies || 0} replies</span>
+              <span class="tag">${isLoggedIn ? '🔓' : '🔒'} Members</span>
+            </div>
+            <div class="lore-views"><i class="fas fa-eye"></i> ${t.views || 0}</div>
+          `;
+          memberLoresEl.appendChild(card);
+          card.addEventListener('click', async () => {
+            if (!isLoggedIn) {
+              toast('Please sign in to view member lore.', 'info');
+              openModal(loginModal);
+              return;
+            }
+            await incrementLoreView(t.id, 'member');
+            renderLores();
+          });
+        });
+
+        subscriberLoresEl.innerHTML = '';
+        const isSub = isLoggedIn && currentUser?.role === 'subscriber';
+        (subscriberLoresData || []).forEach(t => {
+          const card = document.createElement('div');
+          card.className = 'lore-card';
+          if (!isSub) card.classList.add('locked-lore');
+          card.innerHTML = `
+            <h4>${t.title}</h4>
+            <p>${t.description}</p>
+            <div class="lore-meta">
+              <span>by ${t.author} · ${t.replies || 0} replies</span>
+              <span class="tag">${isSub ? '🔓' : '🔒'} Subscribers</span>
+            </div>
+            <div class="lore-views"><i class="fas fa-eye"></i> ${t.views || 0}</div>
+          `;
+          subscriberLoresEl.appendChild(card);
+          card.addEventListener('click', async () => {
+            if (!isSub) {
+              toast('This lore is for subscribers only.', 'error');
+              return;
+            }
+            await incrementLoreView(t.id, 'subscriber');
+            renderLores();
+          });
+        });
       }
 
-      const { error } = await supabaseClient.from('posts').insert([{
-        thread_id: parseInt(threadId),
-        author_name: author,
-        content: content,
-        image_url: imageUrl,
-        session_id: sessionId,
-        media_type: mediaType
-      }]);
+      function renderRequestForm() {
+        if (isLoggedIn) {
+          requestAuthMsg.classList.add('hidden');
+          requestFormFields.classList.remove('hidden');
+        } else {
+          requestAuthMsg.classList.remove('hidden');
+          requestFormFields.classList.add('hidden');
+        }
+      }
 
-      if (error) { setStatus(statusEl, 'Failed: ' + error.message, 'error'); btn.disabled = false; return; }
+      function updateUI() {
+        renderNav();
+        renderGallery();
+        renderRequestForm();
+      }
 
-      setStatus(statusEl, 'Sent! ✅', 'sent');
-      authorInput.value = '';
-      contentInput.value = '';
-      if (imageInput) imageInput.value = '';
-      if (mediaInput) mediaInput.value = '';
-      const imagePreview = document.getElementById(`reply-image-preview-${threadId}`);
-      if (imagePreview) { imagePreview.style.display = 'none'; imagePreview.src = ''; }
-      const imageFilename = document.getElementById(`reply-image-filename-${threadId}`);
-      if (imageFilename) imageFilename.textContent = '';
-      const mediaFilename = document.getElementById(`reply-media-filename-${threadId}`);
-      if (mediaFilename) mediaFilename.textContent = '';
-
-      playPopSound();
-      triggerHaptics();
-
-      await viewThread(threadId);
-      // Update reply count in thread card (optimistic)
-      const { count: newCount } = await supabaseClient.from('posts').select('*', { count: 'exact', head: true }).eq('thread_id', threadId);
-      const commentSpan = document.querySelector(`.thread-card[data-thread-id="${threadId}"] .actions span i.fa-comment`)?.parentElement;
-      if (commentSpan) commentSpan.innerHTML = `<i class="fas fa-comment"></i> ${newCount || 0}`;
-      btn.disabled = false;
-    };
-
-    // ─── CREATE PUBLIC THREAD ──────────────────────────────
-    document.getElementById('create-thread-btn').addEventListener('click', async function () {
-      const titleInput = $('thread-title');
-      const contentInput = $('thread-content');
-      const authorInput = $('author-name');
-      const tagSelect = $('thread-tag');
-      const blurCheck = $('thread-blur');
-      const passwordInput = $('thread-password');
-      const ageInput = $('thread-age');
-      const imageInput = $('thread-image-input');
-      const mediaInput = $('thread-media-input');
-      const statusEl = $('thread-status');
-
-      try {
-        this.disabled = true;
-        setStatus(statusEl, 'Sending...', 'sending');
-
-        const rawTitle = titleInput.value.trim();
-        const rawContent = contentInput.value.trim();
-        const rawAuthor = authorInput.value.trim();
-        const tag = tagSelect.value;
-
-        if (!rawTitle) {
-          alert('Enter a title.');
-          this.disabled = false;
-          setStatus(statusEl, 'Title required', 'error');
+      // ─── LIGHTBOX ─────────────────────────────────────────────
+      function openLightbox(art) {
+        if (!isLoggedIn) {
+          toast('Please sign in to view full-size fusion art.', 'error');
+          openModal(loginModal);
           return;
         }
-        if (!tag) {
-          alert('Please select a tag.');
-          this.disabled = false;
-          setStatus(statusEl, 'Tag required', 'error');
+        if (art.subscriber_only && currentUser?.role !== 'subscriber' && !isAdmin) {
+          toast('This artwork is for subscribers only.', 'error');
+          return;
+        }
+        lbImage.src = art.image_url;
+        lbCaption.innerHTML = `<strong>${art.title}</strong> — ${art.artist} <span style="color:#ff6bff;margin-left:8px;">✦ Fusion</span><br /><span style="font-size:0.85rem;color:#8a92a8;">${art.description || ''}</span><br /><span style="color:#ffd700;font-weight:600;">${art.price || 'Free'}</span>${art.subscriber_only ? '<br /><span style="color:#ff6bff;"><i class="fas fa-crown"></i> Subscriber Only</span>' : ''}`;
+        lightbox.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeLightbox() {
+        lightbox.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+
+      lbClose.addEventListener('click', closeLightbox);
+      lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+
+      function downloadImage(art) {
+        if (!isLoggedIn) { toast('Please sign in to download.', 'error'); openModal(loginModal); return; }
+        if (currentUser?.role !== 'subscriber') { toast('Downloads are for subscribers only.', 'error'); return; }
+        const link = document.createElement('a');
+        link.href = art.image_url;
+        link.download = `${art.title.replace(/\s+/g, '_')}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast(`⬇️ Downloading "${art.title}"...`, 'success');
+      }
+
+      // ─── AUTH HANDLERS ────────────────────────────────────────
+      async function handleLogin() {
+        const email = loginEmail.value.trim(), pass = loginPassword.value.trim();
+        if (!email || !pass) { loginError.textContent = 'Please fill in all fields.'; loginError.classList.add('show'); return; }
+        loginError.classList.remove('show');
+        const ok = await signIn(email, pass);
+        if (ok) {
+          closeModal(loginModal);
+          loginEmail.value = '';
+          loginPassword.value = '';
+          await fetchGallery();
+          await fetchLores();
+          await fetchStats();
+        } else {
+          loginError.textContent = 'Invalid credentials.';
+          loginError.classList.add('show');
+        }
+      }
+
+      async function handleSignup() {
+        const name = signupName.value.trim(), email = signupEmail.value.trim(), pass = signupPassword.value.trim();
+        signupError.classList.remove('show');
+        signupSuccess.classList.remove('show');
+        if (!name || !email || !pass) { signupError.textContent = 'All fields are required.'; signupError.classList.add('show'); return; }
+        if (pass.length < 6) { signupError.textContent = 'Password must be at least 6 characters.'; signupError.classList.add('show'); return; }
+        const ok = await signUp(email, pass, name);
+        if (ok) {
+          signupSuccess.textContent = 'Account created! Please sign in.';
+          signupSuccess.classList.add('show');
+          signupName.value = '';
+          signupEmail.value = '';
+          signupPassword.value = '';
+          setTimeout(() => {
+            signupSuccess.classList.remove('show');
+            closeModal(signupModal);
+            openModal(loginModal);
+          }, 1200);
+        } else {
+          signupError.textContent = 'Signup failed. Try a different email.';
+          signupError.classList.add('show');
+        }
+      }
+
+      async function handleArtRequest() {
+        if (!isLoggedIn) { toast('Please sign in to request a fusion.', 'error'); openModal(loginModal); return; }
+        const title = artTitle.value.trim(), desc = artDesc.value.trim(), style = artStyle.value;
+        if (!title || !desc) { toast('Please fill in both title and description.', 'error'); return; }
+        try {
+          const { error } = await supabase
+            .from('fusion_requests')
+            .insert([{ user_id: currentUser.id, title, description: desc, style, status: 'pending' }]);
+          if (error) throw error;
+          toast('🌀 Fusion request sent!', 'success');
+          artTitle.value = '';
+          artDesc.value = '';
+          artStyle.value = 'shonen';
+        } catch (err) { toast('Error: ' + err.message, 'error'); }
+      }
+
+      async function handleAdminUpload() {
+        adminError.classList.remove('show');
+        adminSuccess.classList.remove('show');
+        const title = adminTitle.value.trim(),
+          artist = adminArtist.value.trim(),
+          desc = adminDesc.value.trim(),
+          price = adminPrice.value.trim() || 'Free Download';
+        const imageFile = adminImage.files[0],
+          thumbFile = adminThumbnail.files[0];
+        const subscriberOnly = adminSubscriberOnly.checked;
+        if (!title || !artist || !imageFile) {
+          adminError.textContent = 'Title, Artist, and Main Image are required.';
+          adminError.classList.add('show');
           return;
         }
 
-        const title = sanitizeInput(rawTitle);
-        const content = sanitizeInput(rawContent);
-        const author = rawAuthor || 'Anonymous';
-        const blurred = blurCheck.checked;
-        let password_hash = null;
-        const password = passwordInput.value.trim();
-        if (password) {
-          password_hash = await sha256(password);
+        adminSubmitBtn.disabled = true;
+        adminSubmitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading…';
+        adminSuccess.textContent = '⏳ Uploading image…';
+        adminSuccess.classList.add('show');
+
+        try {
+          const fileExt = imageFile.name.split('.').pop();
+          const mainFileName = `${Date.now()}_main.${fileExt}`;
+          const mainPath = `public/${mainFileName}`;
+          const { error: uploadMainErr } = await supabase.storage
+            .from('pokefusion-art')
+            .upload(mainPath, imageFile, { cacheControl: '3600', upsert: false });
+          if (uploadMainErr) throw new Error('Main image upload failed: ' + uploadMainErr.message);
+          const { data: mainUrlData } = supabase.storage
+            .from('pokefusion-art')
+            .getPublicUrl(mainPath);
+          const imageUrl = mainUrlData.publicUrl;
+
+          let thumbnailUrl = null;
+          if (thumbFile) {
+            const thumbExt = thumbFile.name.split('.').pop();
+            const thumbFileName = `${Date.now()}_thumb.${thumbExt}`;
+            const thumbPath = `public/${thumbFileName}`;
+            const { error: uploadThumbErr } = await supabase.storage
+              .from('pokefusion-art')
+              .upload(thumbPath, thumbFile, { cacheControl: '3600', upsert: false });
+            if (uploadThumbErr) throw new Error('Thumbnail upload failed: ' + uploadThumbErr.message);
+            const { data: thumbUrlData } = supabase.storage
+              .from('pokefusion-art')
+              .getPublicUrl(thumbPath);
+            thumbnailUrl = thumbUrlData.publicUrl;
+          }
+
+          adminSuccess.textContent = '⏳ Publishing to gallery…';
+          const { error: insertError } = await supabase
+            .from('fusion_art')
+            .insert([{
+              title,
+              artist,
+              description: desc,
+              price,
+              image_url: imageUrl,
+              thumbnail_url: thumbnailUrl,
+              subscriber_only: subscriberOnly,
+              views: 0
+            }]);
+          if (insertError) throw new Error('Database error: ' + insertError.message);
+
+          adminSuccess.textContent = '✅ Artwork added successfully!';
+          adminSuccess.classList.add('show');
+          adminTitle.value = '';
+          adminArtist.value = '';
+          adminDesc.value = '';
+          adminPrice.value = '';
+          adminImage.value = '';
+          adminThumbnail.value = '';
+          adminSubscriberOnly.checked = false;
+          await fetchGallery();
+          toast('New fusion art published!', 'success');
+          setTimeout(() => {
+            adminSuccess.classList.remove('show');
+            closeModal(adminModal);
+          }, 1500);
+        } catch (err) {
+          adminError.textContent = err.message;
+          adminError.classList.add('show');
+          adminSuccess.classList.remove('show');
+        } finally {
+          adminSubmitBtn.disabled = false;
+          adminSubmitBtn.innerHTML = '<i class="fas fa-upload"></i> Upload & Publish';
         }
-        const age_required = parseInt(ageInput.value) || 0;
-        const sessionId = getSessionId();
+      }
 
-        let imageUrl = null;
-        let mediaType = 'image';
-        let fileToUpload = null;
-        let fileType = '';
+      // ─── LORE CREATE ──────────────────────────────────────────
+      function openLoreModal(loreType) {
+        loreTypeSelect.value = loreType;
+        loreTitle.value = '';
+        loreAuthor.value = currentUser?.username || 'Admin';
+        loreDesc.value = '';
+        loreError.classList.remove('show');
+        loreSuccess.classList.remove('show');
+        openModal(loreModal);
+      }
 
-        if (mediaInput && mediaInput.files && mediaInput.files[0]) {
-          fileToUpload = mediaInput.files[0];
-          const mime = fileToUpload.type;
-          if (mime.startsWith('video/')) {
-            fileType = 'video';
+      async function createLore() {
+        const title = loreTitle.value.trim();
+        const author = loreAuthor.value.trim();
+        const description = loreDesc.value.trim();
+        const loreType = loreTypeSelect.value;
+
+        if (!title || !author || !description) {
+          loreError.textContent = 'All fields are required.';
+          loreError.classList.add('show');
+          return;
+        }
+
+        loreError.classList.remove('show');
+        loreSuccess.textContent = '⏳ Creating lore…';
+        loreSuccess.classList.add('show');
+        loreSubmitBtn.disabled = true;
+
+        try {
+          let tableName = '';
+          let insertData = { title, author, description, replies: 0, views: 0 };
+
+          if (loreType === 'public') {
+            tableName = 'public_lore';
+          } else if (loreType === 'member') {
+            tableName = 'member_lore';
           } else {
-            fileType = 'file';
+            tableName = 'threads';
+            insertData.thread_type = 'subscriber';
           }
-        } else if (imageInput && imageInput.files && imageInput.files[0]) {
-          fileToUpload = imageInput.files[0];
-          fileType = 'image';
+
+          const { error } = await supabase
+            .from(tableName)
+            .insert([insertData]);
+          if (error) throw error;
+
+          loreSuccess.textContent = '✅ Lore created!';
+          loreSuccess.classList.add('show');
+          await fetchLores();
+          toast('Lore created successfully!', 'success');
+
+          setTimeout(() => {
+            loreSuccess.classList.remove('show');
+            closeModal(loreModal);
+          }, 1200);
+        } catch (err) {
+          loreError.textContent = err.message;
+          loreError.classList.add('show');
+        } finally {
+          loreSubmitBtn.disabled = false;
         }
-
-        if (fileToUpload) {
-          const folder = fileType === 'image' ? 'images' : 'media';
-          imageUrl = await uploadFile(fileToUpload, folder);
-          if (!imageUrl) {
-            setStatus(statusEl, 'File upload failed', 'error');
-            this.disabled = false;
-            return;
-          }
-          mediaType = fileType;
-        }
-
-        const { error } = await supabaseClient.from('threads').insert([{
-          title: title,
-          content: content,
-          author_name: author,
-          tag: tag,
-          blurred: blurred,
-          password_hash: password_hash,
-          age_required: age_required,
-          session_id: sessionId,
-          image_url: imageUrl,
-          media_type: mediaType
-        }]);
-
-        if (error) {
-          console.error('Supabase insert error:', error);
-          setStatus(statusEl, 'Failed: ' + error.message, 'error');
-          this.disabled = false;
-          return;
-        }
-
-        setStatus(statusEl, 'Sent! ✅', 'sent');
-        titleInput.value = '';
-        contentInput.value = '';
-        authorInput.value = '';
-        tagSelect.value = '';
-        blurCheck.checked = false;
-        passwordInput.value = '';
-        ageInput.value = '';
-        if (imageInput) imageInput.value = '';
-        if (mediaInput) mediaInput.value = '';
-        $('thread-image-preview').style.display = 'none';
-        $('thread-image-preview').src = '';
-        $('thread-image-filename').textContent = '';
-        $('thread-media-filename').textContent = '';
-
-        loadThreads();
-        playPopSound();
-        triggerHaptics();
-
-      } catch (err) {
-        console.error('Unexpected error:', err);
-        setStatus(statusEl, 'Error: ' + err.message, 'error');
-      } finally {
-        this.disabled = false;
       }
-    });
 
-    // File input previews
-    document.getElementById('thread-image-input').addEventListener('change', function(e) {
-      const preview = $('thread-image-preview');
-      const filename = $('thread-image-filename');
-      if (this.files && this.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(ev) { preview.src = ev.target.result; preview.style.display = 'block'; };
-        reader.readAsDataURL(this.files[0]);
-        filename.textContent = this.files[0].name;
-      } else {
-        preview.style.display = 'none';
-        preview.src = '';
-        filename.textContent = '';
-      }
-    });
-    document.getElementById('thread-media-input').addEventListener('change', function(e) {
-      const filename = $('thread-media-filename');
-      if (this.files && this.files[0]) { filename.textContent = this.files[0].name; } else { filename.textContent = ''; }
-    });
-
-    // ─── LOAD MEMBER THREADS (BATCHED) ──────────────────
-    async function loadMemberThreads() {
-      if (!currentUser) return;
-      memberContainer.innerHTML = `<p style="color:#7a82a0; text-align:center; padding:1rem;">Loading member threads...</p>`;
-      const tagFilter = $('memberTagFilter').value;
-      try {
-        let query = supabaseClient.from('member_threads').select('*').order('created_at', { ascending: false });
-        if (tagFilter !== 'all') query = query.eq('tag', tagFilter);
-        const { data: threads, error } = await query;
-        if (error) throw error;
-        if (!threads || threads.length === 0) {
-          memberContainer.innerHTML = `<p style="color:#7a82a0; text-align:center; padding:1rem;">No member threads with this tag. Start one above!</p>`;
-          return;
-        }
-        const admin = isAdmin();
-        const fragment = document.createDocumentFragment();
-        const tempDiv = document.createElement('div');
-
-        // Batch reply counts for member threads
-        const threadIds = threads.map(t => t.id);
-        let replyCounts = {};
-        if (threadIds.length > 0) {
-          const { data: repliesData, error: repliesError } = await supabaseClient
-            .from('member_posts')
-            .select('thread_id')
-            .in('thread_id', threadIds);
-          if (!repliesError) {
-            const counts = {};
-            repliesData.forEach(r => { counts[r.thread_id] = (counts[r.thread_id] || 0) + 1; });
-            replyCounts = counts;
-          }
-        }
-
-        for (const t of threads) {
-          const replyCount = replyCounts[t.id] || 0;
-          const userInfo = getUserDisplay(t.author_name || 'Anonymous');
-          const displayName = userInfo.displayName;
-          const badgeHtml = userInfo.badge;
-          const tagBadge = t.tag ? `<span class="tag-badge">${sanitizeInput(t.tag)}</span>` : '';
-          const canEdit = admin || isOwner(t.author_id);
-          const editBtns = canEdit ? `
-            <span class="edit-btn" onclick="editMemberThread('${t.id}')" data-editing="false"><i class="fas fa-pen"></i></span>
-            <span class="delete-btn" onclick="deleteMemberThread('${t.id}')"><i class="fas fa-trash"></i></span>
-            ${admin ? '<span class="admin-label">Admin</span>' : ''}
-          ` : '';
-          const html = `<div class="member-thread" data-thread-id="${t.id}">
-            <div class="author">
-              <img src="${getAvatar(displayName)}" alt="" />
-              <span class="name">${sanitizeInput(displayName)} ${badgeHtml}</span>
-              ${tagBadge}
-              <span class="time">${new Date(t.created_at).toLocaleString()}</span>
-            </div>
-            <h3>${sanitizeInput(t.title)}</h3>
-            <div class="content">${sanitizeInput(t.content || '')}</div>
-            <div class="actions">
-              <span><i class="fas fa-comment"></i> ${replyCount}</span>
-              <span><i class="fas fa-eye"></i> <span class="view-count">${t.views || 0}</span></span>
-              ${editBtns}
-            </div>
-            <div id="member-replies-${t.id}" class="member-replies"></div>
-            <button class="show-replies-btn" onclick="viewMemberThread('${t.id}')">
-              <i class="fas fa-chevron-down"></i> Show replies
-            </button>
-          </div>`;
-          tempDiv.innerHTML = html;
-          fragment.appendChild(tempDiv.firstElementChild);
-        }
-        memberContainer.innerHTML = '';
-        memberContainer.appendChild(fragment);
-        for (const t of threads) {
-          registerView(t.id, 'member');
-        }
-      } catch (e) { memberContainer.innerHTML = `<p style="color:#f43f5e;">❌ Error: ${e.message}</p>`; }
-    }
-
-    document.getElementById('memberTagFilter').addEventListener('change', function() {
-      clearTimeout(this._timeout);
-      this._timeout = setTimeout(loadMemberThreads, 200);
-    });
-
-    // ─── VIEW MEMBER THREAD (replies) ──────────────────
-    window.viewMemberThread = async function(threadId) {
-      const container = document.getElementById(`member-replies-${threadId}`);
-      if (!container) return;
-      if (container.classList.contains('hidden')) {
-        container.classList.remove('hidden');
-        const { data: posts, error } = await supabaseClient.from('member_posts').select('*').eq('thread_id', threadId).order('created_at', { ascending: true });
-        if (error) { container.innerHTML = `<p style="color:#f43f5e;">❌ Error: ${error.message}</p>`; return; }
-        const admin = isAdmin();
-        let html = '';
-        if (!posts || posts.length === 0) { html = '<p style="color:#7a82a0; font-size:0.85rem;">No replies yet.</p>'; }
-        else {
-          html = posts.map(p => {
-            const userInfo = getUserDisplay(p.author_name || 'Anonymous');
-            const displayName = userInfo.displayName;
-            const canEdit = admin || isOwner(p.author_id);
-            const editBtns = canEdit ? `
-              <span class="edit-btn" onclick="editMemberPost('${threadId}','${p.id}')" data-editing="false"><i class="fas fa-pen"></i></span>
-              <span class="delete-btn" onclick="deleteMemberPost('${threadId}','${p.id}')"><i class="fas fa-trash"></i></span>
-              ${admin ? '<span class="admin-label">Admin</span>' : ''}
-            ` : '';
-            return `<div class="member-reply" data-post-id="${p.id}">
-              <div class="author">
-                <img src="${getAvatar(displayName)}" alt="" />
-                <span class="name">${sanitizeInput(displayName)}</span>
-                <span class="time">${new Date(p.created_at).toLocaleString()}</span>
-              </div>
-              <div class="content">${sanitizeInput(p.content)}</div>
-              <div class="actions">${editBtns}</div>
-            </div>`;
-          }).join('');
-        }
-        html += `<div class="member-reply-form">
-          <textarea id="member-reply-${threadId}" placeholder="Write a reply..." rows="1"></textarea>
-          <button onclick="addMemberReply('${threadId}')"><i class="fas fa-reply"></i> Reply</button>
-        </div>`;
-        container.innerHTML = html;
-        container.classList.remove('hidden');
-      } else { container.classList.add('hidden'); }
-    };
-
-    window.addMemberReply = async function(threadId) {
-      if (!currentUser) { alert('Please sign in to reply.'); return; }
-      const contentInput = document.getElementById(`member-reply-${threadId}`);
-      const content = contentInput.value.trim();
-      if (!content) { alert('Write something.'); return; }
-      const { error } = await supabaseClient.from('member_posts').insert([{ thread_id: parseInt(threadId), author_id: currentUser.id, author_name: currentUser.email, content: content }]);
-      if (error) { alert('❌ Error: ' + error.message); return; }
-      contentInput.value = ''; playPopSound();
-      await viewMemberThread(threadId);
-      loadMemberThreads();
-    };
-
-    document.getElementById('member-create-btn').addEventListener('click', async function() {
-      if (!currentUser) { alert('Please sign in to post.'); return; }
-      const titleInput = $('member-thread-title');
-      const contentInput = $('member-thread-content');
-      const tagSelect = $('member-thread-tag');
-      const statusEl = $('member-thread-status');
-      const title = titleInput.value.trim();
-      const content = contentInput.value.trim();
-      const tag = tagSelect.value;
-      if (!title) { alert('Enter a title.'); return; }
-      if (!tag) { alert('Please select a tag.'); return; }
-      this.disabled = true;
-      setStatus(statusEl, 'Sending...', 'sending');
-      const { error } = await supabaseClient.from('member_threads').insert([{ title: title, content: content, author_id: currentUser.id, author_name: currentUser.email, tag: tag }]);
-      if (error) { setStatus(statusEl, 'Failed: ' + error.message, 'error'); this.disabled = false; return; }
-      setStatus(statusEl, 'Sent! ✅', 'sent');
-      titleInput.value = ''; contentInput.value = ''; tagSelect.value = '';
-      loadMemberThreads();
-      this.disabled = false;
-    });
-
-    // Member file input previews
-    document.getElementById('member-image-input').addEventListener('change', function(e) {
-      const preview = $('member-image-preview');
-      const filename = $('member-image-filename');
-      if (this.files && this.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(ev) { preview.src = ev.target.result; preview.style.display = 'block'; };
-        reader.readAsDataURL(this.files[0]);
-        filename.textContent = this.files[0].name;
-      } else {
-        preview.style.display = 'none';
-        preview.src = '';
-        filename.textContent = '';
-      }
-    });
-    document.getElementById('member-media-input').addEventListener('change', function(e) {
-      const filename = $('member-media-filename');
-      if (this.files && this.files[0]) { filename.textContent = this.files[0].name; } else { filename.textContent = ''; }
-    });
-
-    // ─── LIKES, BLUR, UNLOCK, AGE ──────────────────────────
-    window.toggleLike = async function(threadId) {
-      const userName = getUserName();
-      const likeToggle = document.querySelector(`.like-toggle[data-thread="${threadId}"]`);
-      if (!likeToggle) return;
-      const { data: existing } = await supabaseClient.from('likes').select('*').eq('thread_id', parseInt(threadId)).eq('user_name', userName);
-      if (existing && existing.length > 0) {
-        const { error } = await supabaseClient.from('likes').delete().eq('thread_id', parseInt(threadId)).eq('user_name', userName);
-        if (error) { alert('Error: ' + error.message); return; }
-      } else {
-        const { error } = await supabaseClient.from('likes').insert([{ thread_id: parseInt(threadId), user_name: userName }]);
-        if (error) { alert('Error: ' + error.message); return; }
-        triggerHaptics(); playPopSound();
-      }
-      loadThreads();
-    };
-
-    window.toggleBlur = function(threadId, imgElement) {
-      const current = imgElement.classList.contains('unblurred');
-      if (current) { imgElement.classList.remove('unblurred'); localStorage.setItem(`unblurred_${threadId}`, 'false'); }
-      else { imgElement.classList.add('unblurred'); localStorage.setItem(`unblurred_${threadId}`, 'true'); }
-    };
-
-    window.unlockThread = async function(threadId) {
-      const input = document.getElementById(`pwd-input-${threadId}`);
-      const errorSpan = document.getElementById(`pwd-error-${threadId}`);
-      const entered = input.value;
-      if (!entered) { errorSpan.textContent = 'Enter a password.'; return; }
-      const { data, error } = await supabaseClient.from('threads').select('password_hash').eq('id', threadId).single();
-      if (error) { errorSpan.textContent = 'Error fetching password.'; return; }
-      const enteredHash = await sha256(entered);
-      if (enteredHash === data.password_hash) { localStorage.setItem(`unlocked_${threadId}`, 'true'); loadThreads(); }
-      else { errorSpan.textContent = 'Incorrect password.'; }
-    };
-
-    window.verifyAge = function(threadId, requiredAge) {
-      const input = document.getElementById(`age-input-${threadId}`);
-      const errorSpan = document.getElementById(`age-error-${threadId}`);
-      const age = parseInt(input.value);
-      if (isNaN(age) || age < requiredAge) { errorSpan.textContent = `You must be at least ${requiredAge} years old.`; return; }
-      localStorage.setItem(`age_verified_${threadId}`, 'true');
-      loadThreads();
-    };
-
-    // ─── INIT ──────────────────────────────────────────────
-    async function checkAuthAndInit() {
-      await checkAuth();
-      supabaseClient.auth.onAuthStateChange((event, session) => {
-        if (event === 'SIGNED_IN' && session) { currentUser = session.user; currentSession = session; updateUIForLoggedIn(); updateAdminUI(); loadThreads(); if(currentUser) loadMemberThreads(); }
-        else if (event === 'SIGNED_OUT') { currentUser = null; currentSession = null; updateUIForLoggedOut(); updateAdminUI(); loadThreads(); }
+      // ─── EVENT BINDINGS ──────────────────────────────────────
+      document.querySelectorAll('.new-lore-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const type = btn.dataset.type;
+          openLoreModal(type);
+        });
       });
-    }
 
-    async function init() {
-      try {
-        await loadThreads();
-        await checkAuthAndInit();
-        await updateStats();
-        startHeartbeat();
-      } catch (e) {
-        console.error('Init error:', e);
+      loreClose.addEventListener('click', () => closeModal(loreModal));
+      loreModal.addEventListener('click', (e) => { if (e.target === loreModal) closeModal(loreModal); });
+      loreSubmitBtn.addEventListener('click', createLore);
+
+      loginClose.addEventListener('click', () => closeModal(loginModal));
+      signupClose.addEventListener('click', () => closeModal(signupModal));
+      adminClose.addEventListener('click', () => closeModal(adminModal));
+
+      loginToSignup.addEventListener('click', () => { closeModal(loginModal); openModal(signupModal); });
+      signupToLogin.addEventListener('click', () => { closeModal(signupModal); openModal(loginModal); });
+      loginModal.addEventListener('click', (e) => { if (e.target === loginModal) closeModal(loginModal); });
+      signupModal.addEventListener('click', (e) => { if (e.target === signupModal) closeModal(signupModal); });
+      adminModal.addEventListener('click', (e) => { if (e.target === adminModal) closeModal(adminModal); });
+
+      loginBtn.addEventListener('click', handleLogin);
+      loginPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleLogin(); });
+      signupBtn.addEventListener('click', handleSignup);
+      signupPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleSignup(); });
+
+      requestLoginLink.addEventListener('click', (e) => { e.preventDefault(); openModal(loginModal); });
+      requestSignupLink.addEventListener('click', (e) => { e.preventDefault(); openModal(signupModal); });
+      submitArtRequest.addEventListener('click', handleArtRequest);
+
+      adminFab.addEventListener('click', () => { adminError.classList.remove('show'); adminSuccess.classList.remove('show'); openModal(adminModal); });
+      adminSubmitBtn.addEventListener('click', handleAdminUpload);
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          if (lightbox.classList.contains('active')) closeLightbox();
+          if (loginModal.classList.contains('active')) closeModal(loginModal);
+          if (signupModal.classList.contains('active')) closeModal(signupModal);
+          if (adminModal.classList.contains('active')) closeModal(adminModal);
+          if (loreModal.classList.contains('active')) closeModal(loreModal);
+        }
+      });
+
+      // ─── INIT ──────────────────────────────────────────────────
+      async function init() {
+        await incrementTotalVisits();
+
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .maybeSingle();
+          if (!error && profile) {
+            currentUser = { ...session.user, ...profile };
+            isLoggedIn = true;
+            isAdmin = (currentUser.email === ADMIN_EMAIL);
+          } else {
+            const { error: insertErr } = await supabase
+              .from('profiles')
+              .insert([{ id: session.user.id, username: session.user.email.split('@')[0], role: 'member' }]);
+            if (!insertErr) {
+              const { data: newProfile } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', session.user.id)
+                .maybeSingle();
+              if (newProfile) {
+                currentUser = { ...session.user, ...newProfile };
+                isLoggedIn = true;
+                isAdmin = (currentUser.email === ADMIN_EMAIL);
+              }
+            }
+          }
+        }
+        updateUI();
+        await fetchGallery();
+        await fetchLores();
+        await fetchStats();
+
+        if (isLoggedIn) toast(`👋 Welcome, ${currentUser.username}!`, 'success');
+        console.log('⚡ PK‑Jump Neon loaded – view counting ALWAYS increments.');
       }
-    }
 
-    // Ensure scrolling works after intro
-    document.addEventListener('DOMContentLoaded', function() {
-      // Remove overflow hidden after intro animation ends (3.3s)
-      setTimeout(() => {
-        document.body.style.overflow = 'auto';
-      }, 3300);
       init();
-    });
+    })();
   </script>
 </body>
 </html>
