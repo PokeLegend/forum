@@ -896,7 +896,7 @@
   <!-- ─── TOAST CONTAINER ─── -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <!-- ─── JAVASCRIPT ────────────────────────────────────────── -->
+  <!-- ─── JAVASCRIPT (FIXED) ────────────────────────────────── -->
   <script>
     (function() {
       'use strict';
@@ -1192,6 +1192,7 @@
             return 0;
           });
           renderGallery();
+          await fetchStats(); // update stats after load
         } catch (err) {
           console.warn('Gallery fetch error:', err);
           galleryData = [];
@@ -1230,8 +1231,17 @@
         }
       }
 
+      // ─── STATS ─────────────────────────────────────────────
       async function fetchStats() {
         try {
+          // Compute total art views from galleryData (sum of all individual views)
+          const artViews = galleryData.reduce((sum, art) => sum + (art.views || 0), 0);
+          document.getElementById('statArtViews').textContent = artViews;
+
+          // Artworks count
+          document.getElementById('statArt').textContent = galleryData.length;
+
+          // Other stats from site_stats
           const { data, error } = await supabase
             .from('site_stats')
             .select('*')
@@ -1244,8 +1254,6 @@
             document.getElementById('statAdmins').textContent = data.total_admins || 0;
             document.getElementById('statLores').textContent = data.total_threads || 0;
             document.getElementById('statReplies').textContent = data.total_replies || 0;
-            document.getElementById('statArt').textContent = data.total_artworks || 0;
-            document.getElementById('statArtViews').textContent = data.total_art_views || 0;
           }
         } catch (err) {
           console.warn('Stats fetch error:', err);
@@ -1378,6 +1386,7 @@
           const handleViewClick = async (e) => {
             e.stopPropagation();
             await incrementArtView(art.id);
+            await fetchStats(); // 🔥 FIX: update stats bar immediately
             renderGallery();
             if (canEnlarge) {
               openLightbox(art);
